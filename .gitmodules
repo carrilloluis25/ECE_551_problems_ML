@@ -1,0 +1,3 @@
+[submodule "fast-ddpm"]
+	path = fast-ddpm
+	url = git@github.com:carrilloluis25/Fast-DDPM.git
