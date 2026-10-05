@@ -1,0 +1,225 @@
+INFO - fast_ddpm_main.py - 2026-09-29 16:32:10,483 - Using device: cuda
+INFO - fast_ddpm_main.py - 2026-09-29 16:32:10,486 - Writing log file to /users/lc2025/carc-scratch/fastddpm-exp/logs/ldfdct_smoke_test
+INFO - fast_ddpm_main.py - 2026-09-29 16:32:10,486 - Exp instance id = 2335386
+INFO - fast_ddpm_main.py - 2026-09-29 16:32:10,486 - Exp comment = 
+Generating image samples for FID evaluation.: 0it [00:00, ?it/s]INFO - diffusion.py - 2026-09-29 16:32:20,375 - Case C002: PSNR 37.87311018347272, SSIM 0.9273369200687109, time 5.3267481327056885
+Generating image samples for FID evaluation.: 1it [00:06,  6.34s/it]INFO - diffusion.py - 2026-09-29 16:32:24,841 - Case C002: PSNR 36.89545107966596, SSIM 0.914097796236217, time 3.6238725185394287
+Generating image samples for FID evaluation.: 2it [00:10,  5.24s/it]INFO - diffusion.py - 2026-09-29 16:32:29,287 - Case C002: PSNR 36.52496754803402, SSIM 0.9094603169919252, time 3.605970621109009
+Generating image samples for FID evaluation.: 3it [00:15,  4.88s/it]INFO - diffusion.py - 2026-09-29 16:32:33,740 - Case C002: PSNR 36.994193793875915, SSIM 0.9149607268555164, time 3.6121695041656494
+Generating image samples for FID evaluation.: 4it [00:19,  4.73s/it]INFO - diffusion.py - 2026-09-29 16:32:38,232 - Case C002: PSNR 37.22298221420406, SSIM 0.9249045326662659, time 3.6095728874206543
+Generating image samples for FID evaluation.: 5it [00:24,  4.62s/it]INFO - diffusion.py - 2026-09-29 16:32:42,663 - Case C002: PSNR 38.01930440484149, SSIM 0.9305522716490628, time 3.6185474395751953
+Generating image samples for FID evaluation.: 6it [00:28,  4.55s/it]INFO - diffusion.py - 2026-09-29 16:32:47,102 - Case C002: PSNR 38.043056797882635, SSIM 0.929494621713996, time 3.62855863571167
+Generating image samples for FID evaluation.: 7it [00:33,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:32:51,518 - Case C002: PSNR 38.82438442288091, SSIM 0.940864806491226, time 3.610895872116089
+Generating image samples for FID evaluation.: 8it [00:37,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:32:55,972 - Case C002: PSNR 39.42798754313288, SSIM 0.9452417631900308, time 3.6133549213409424
+Generating image samples for FID evaluation.: 9it [00:41,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:33:00,403 - Case C002: PSNR 39.021910257474566, SSIM 0.9415787796639205, time 3.62971568107605
+Generating image samples for FID evaluation.: 10it [00:46,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:33:04,873 - Case C002: PSNR 39.04467025250721, SSIM 0.9402271534470916, time 3.615525960922241
+Generating image samples for FID evaluation.: 11it [00:51,  4.53s/it]INFO - diffusion.py - 2026-09-29 16:33:09,543 - Case C002: PSNR 38.318607753040375, SSIM 0.9314682834493815, time 3.614920139312744
+Generating image samples for FID evaluation.: 12it [00:55,  4.50s/it]INFO - diffusion.py - 2026-09-29 16:33:13,976 - Case C002: PSNR 36.85204942232755, SSIM 0.9042462796609403, time 3.621795177459717
+Generating image samples for FID evaluation.: 13it [00:59,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:33:18,413 - Case C002: PSNR 36.370466250416314, SSIM 0.8815828381015658, time 3.6317026615142822
+Generating image samples for FID evaluation.: 14it [01:04,  4.55s/it]INFO - diffusion.py - 2026-09-29 16:33:23,102 - Case C002: PSNR 36.4767894564527, SSIM 0.8902637095783353, time 3.6193249225616455
+Generating image samples for FID evaluation.: 15it [01:09,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:33:27,537 - Case C002: PSNR 37.05040706398381, SSIM 0.9047661381475329, time 3.6158456802368164
+Generating image samples for FID evaluation.: 16it [01:13,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:33:31,972 - Case C002: PSNR 37.85990214538423, SSIM 0.9238053416457176, time 3.616368055343628
+Generating image samples for FID evaluation.: 17it [01:17,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:33:36,439 - Case C002: PSNR 39.60766603871715, SSIM 0.9373119101323486, time 3.619844675064087
+Generating image samples for FID evaluation.: 18it [01:22,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:33:40,864 - Case C050: PSNR 39.644340301563915, SSIM 0.9386610939827859, time 3.6372530460357666
+Generating image samples for FID evaluation.: 19it [01:26,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:33:45,280 - Case C050: PSNR 40.287276532552674, SSIM 0.9498836108136773, time 3.6176483631134033
+Generating image samples for FID evaluation.: 20it [01:31,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:33:49,740 - Case C050: PSNR 40.057713729982595, SSIM 0.953079619158566, time 3.619908571243286
+Generating image samples for FID evaluation.: 21it [01:35,  4.44s/it]INFO - diffusion.py - 2026-09-29 16:33:54,146 - Case C050: PSNR 39.63769251201654, SSIM 0.9522803617377281, time 3.619386911392212
+Generating image samples for FID evaluation.: 22it [01:40,  4.44s/it]INFO - diffusion.py - 2026-09-29 16:33:58,584 - Case C050: PSNR 38.57865333345712, SSIM 0.9456147664613723, time 3.6269052028656006
+Generating image samples for FID evaluation.: 23it [01:44,  4.44s/it]INFO - diffusion.py - 2026-09-29 16:34:03,032 - Case C050: PSNR 37.833624774175384, SSIM 0.9340967805040776, time 3.631889820098877
+Generating image samples for FID evaluation.: 24it [01:49,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:34:07,516 - Case C050: PSNR 38.1729679066136, SSIM 0.9301266953582464, time 3.6251347064971924
+Generating image samples for FID evaluation.: 25it [01:53,  4.44s/it]INFO - diffusion.py - 2026-09-29 16:34:11,927 - Case C050: PSNR 36.88344186969905, SSIM 0.9215475836076736, time 3.620558261871338
+Generating image samples for FID evaluation.: 26it [01:57,  4.44s/it]INFO - diffusion.py - 2026-09-29 16:34:16,372 - Case C050: PSNR 36.95632158153309, SSIM 0.9212903041925132, time 3.620270013809204
+Generating image samples for FID evaluation.: 27it [02:02,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:34:20,840 - Case C050: PSNR 36.90931499572496, SSIM 0.9202564372903407, time 3.6197993755340576
+Generating image samples for FID evaluation.: 28it [02:06,  4.44s/it]INFO - diffusion.py - 2026-09-29 16:34:25,274 - Case C050: PSNR 37.663512967834386, SSIM 0.9290172181077303, time 3.62723445892334
+Generating image samples for FID evaluation.: 29it [02:11,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:34:29,752 - Case C050: PSNR 38.46387595400506, SSIM 0.9377668880770206, time 3.6211259365081787
+Generating image samples for FID evaluation.: 30it [02:15,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:34:34,239 - Case C050: PSNR 39.42181369296525, SSIM 0.9486250466382801, time 3.631286382675171
+Generating image samples for FID evaluation.: 31it [02:20,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:34:38,690 - Case C050: PSNR 40.57385616446097, SSIM 0.9528347810550929, time 3.6326346397399902
+Generating image samples for FID evaluation.: 32it [02:24,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:34:43,114 - Case C050: PSNR 39.974393580801404, SSIM 0.9517778159366846, time 3.6221044063568115
+Generating image samples for FID evaluation.: 33it [02:29,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:34:47,542 - Case C050: PSNR 40.121867898243686, SSIM 0.9501005769551992, time 3.621018171310425
+Generating image samples for FID evaluation.: 34it [02:33,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:34:51,993 - Case C050: PSNR 39.922129153753104, SSIM 0.948672501650989, time 3.6226232051849365
+Generating image samples for FID evaluation.: 35it [02:38,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:34:56,637 - Case C050: PSNR 39.688610846816324, SSIM 0.9509547737559678, time 3.6218607425689697
+Generating image samples for FID evaluation.: 36it [02:42,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:35:01,070 - Case C050: PSNR 40.334249477442995, SSIM 0.9550165390123725, time 3.621626377105713
+Generating image samples for FID evaluation.: 37it [02:47,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:35:05,542 - Case C050: PSNR 41.771113781029406, SSIM 0.9631047018237264, time 3.625434637069702
+Generating image samples for FID evaluation.: 38it [02:51,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:35:09,960 - Case C050: PSNR 39.907891265013696, SSIM 0.9349480324813724, time 3.64249324798584
+Generating image samples for FID evaluation.: 39it [02:55,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:35:14,390 - Case C050: PSNR 39.59311586654389, SSIM 0.926508148735732, time 3.6264281272888184
+Generating image samples for FID evaluation.: 40it [03:00,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:35:18,818 - Case C050: PSNR 39.318991238631355, SSIM 0.9255755748351214, time 3.6227610111236572
+Generating image samples for FID evaluation.: 41it [03:05,  4.55s/it]INFO - diffusion.py - 2026-09-29 16:35:23,605 - Case C050: PSNR 39.18324600176632, SSIM 0.9262985998149513, time 3.622769355773926
+Generating image samples for FID evaluation.: 42it [03:09,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:35:28,038 - Case C050: PSNR 38.431630186300694, SSIM 0.9333256146401763, time 3.623586654663086
+Generating image samples for FID evaluation.: 43it [03:13,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:35:32,480 - Case C052: PSNR 37.29547336523298, SSIM 0.9302343804709017, time 3.622114896774292
+Generating image samples for FID evaluation.: 44it [03:18,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:35:36,959 - Case C052: PSNR 36.175145711523626, SSIM 0.9107009183730483, time 3.623441219329834
+Generating image samples for FID evaluation.: 45it [03:22,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:35:41,430 - Case C052: PSNR 35.884158028705514, SSIM 0.9065871852529644, time 3.6263277530670166
+Generating image samples for FID evaluation.: 46it [03:27,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:35:45,908 - Case C052: PSNR 35.52534627645281, SSIM 0.9024443130692541, time 3.624251127243042
+Generating image samples for FID evaluation.: 47it [03:32,  4.70s/it]INFO - diffusion.py - 2026-09-29 16:35:51,118 - Case C052: PSNR 35.64609340796323, SSIM 0.9010080097087622, time 3.633094549179077
+Generating image samples for FID evaluation.: 48it [03:37,  4.63s/it]INFO - diffusion.py - 2026-09-29 16:35:55,581 - Case C052: PSNR 35.44629794256635, SSIM 0.9051486588316262, time 3.6296303272247314
+Generating image samples for FID evaluation.: 49it [03:41,  4.58s/it]INFO - diffusion.py - 2026-09-29 16:36:00,043 - Case C052: PSNR 36.204560429260944, SSIM 0.905016554570526, time 3.6237664222717285
+Generating image samples for FID evaluation.: 50it [03:46,  4.55s/it]INFO - diffusion.py - 2026-09-29 16:36:04,523 - Case C052: PSNR 36.68828479781256, SSIM 0.9206220265391173, time 3.6230173110961914
+Generating image samples for FID evaluation.: 51it [03:50,  4.53s/it]INFO - diffusion.py - 2026-09-29 16:36:09,014 - Case C052: PSNR 37.66307059405626, SSIM 0.9290428923919202, time 3.6218438148498535
+Generating image samples for FID evaluation.: 52it [03:54,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:36:13,481 - Case C052: PSNR 38.51770637149901, SSIM 0.9395159681881369, time 3.621603012084961
+Generating image samples for FID evaluation.: 53it [03:59,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:36:17,929 - Case C052: PSNR 38.810384208241835, SSIM 0.9430535188114942, time 3.6222734451293945
+Generating image samples for FID evaluation.: 54it [04:03,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:36:22,374 - Case C052: PSNR 39.27112313402734, SSIM 0.9464352061287463, time 3.6263883113861084
+Generating image samples for FID evaluation.: 55it [04:08,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:36:26,844 - Case C052: PSNR 38.421578429466656, SSIM 0.9404844662706257, time 3.6268210411071777
+Generating image samples for FID evaluation.: 56it [04:12,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:36:31,296 - Case C052: PSNR 37.88692488544739, SSIM 0.9358907972989827, time 3.6249475479125977
+Generating image samples for FID evaluation.: 57it [04:17,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:36:35,755 - Case C052: PSNR 37.20001410091776, SSIM 0.9371164851131439, time 3.622469902038574
+Generating image samples for FID evaluation.: 58it [04:21,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:36:40,204 - Case C052: PSNR 35.280037553285176, SSIM 0.9211504720333885, time 3.622971773147583
+Generating image samples for FID evaluation.: 59it [04:26,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:36:44,635 - Case C052: PSNR 36.65542497392674, SSIM 0.8984743045065106, time 3.623337507247925
+Generating image samples for FID evaluation.: 60it [04:30,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:36:49,096 - Case C052: PSNR 36.86720529018788, SSIM 0.9067767901769579, time 3.6230623722076416
+Generating image samples for FID evaluation.: 61it [04:35,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:36:53,552 - Case C052: PSNR 37.65847014683251, SSIM 0.9190570875958206, time 3.6247048377990723
+Generating image samples for FID evaluation.: 62it [04:39,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:36:58,029 - Case C052: PSNR 38.246488389411184, SSIM 0.9334713983193637, time 3.6226963996887207
+Generating image samples for FID evaluation.: 63it [04:43,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:37:02,488 - Case C052: PSNR 37.96360243600546, SSIM 0.9251792781415582, time 3.623612880706787
+Generating image samples for FID evaluation.: 64it [04:48,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:37:06,955 - Case C067: PSNR 38.28469066703284, SSIM 0.929302585326314, time 3.6248016357421875
+Generating image samples for FID evaluation.: 65it [04:52,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:37:11,425 - Case C067: PSNR 38.48742511587744, SSIM 0.9414118399180174, time 3.6223878860473633
+Generating image samples for FID evaluation.: 66it [04:57,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:37:15,944 - Case C067: PSNR 38.09130857335485, SSIM 0.9353691377671958, time 3.6274917125701904
+Generating image samples for FID evaluation.: 67it [05:01,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:37:20,415 - Case C067: PSNR 37.17170367273976, SSIM 0.9284583872056603, time 3.622652530670166
+Generating image samples for FID evaluation.: 68it [05:06,  4.52s/it]INFO - diffusion.py - 2026-09-29 16:37:25,047 - Case C067: PSNR 36.482957020199876, SSIM 0.9186147444343568, time 3.6245832443237305
+Generating image samples for FID evaluation.: 69it [05:11,  4.50s/it]INFO - diffusion.py - 2026-09-29 16:37:29,505 - Case C067: PSNR 36.52101191944872, SSIM 0.9182953253403604, time 3.6262271404266357
+Generating image samples for FID evaluation.: 70it [05:15,  4.50s/it]INFO - diffusion.py - 2026-09-29 16:37:33,999 - Case C067: PSNR 36.374501040745905, SSIM 0.9185343063178658, time 3.6244137287139893
+Generating image samples for FID evaluation.: 71it [05:19,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:37:38,465 - Case C067: PSNR 36.81562016177081, SSIM 0.9196842731188535, time 3.6238105297088623
+Generating image samples for FID evaluation.: 72it [05:24,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:37:42,913 - Case C067: PSNR 37.180956955532665, SSIM 0.9280535114008188, time 3.6237354278564453
+Generating image samples for FID evaluation.: 73it [05:28,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:37:47,394 - Case C067: PSNR 37.73584695287879, SSIM 0.9316883638320564, time 3.6232643127441406
+Generating image samples for FID evaluation.: 74it [05:33,  4.52s/it]INFO - diffusion.py - 2026-09-29 16:37:52,014 - Case C067: PSNR 38.90687303205391, SSIM 0.9442640207874178, time 3.6230123043060303
+Generating image samples for FID evaluation.: 75it [05:37,  4.50s/it]INFO - diffusion.py - 2026-09-29 16:37:56,475 - Case C067: PSNR 39.14424418346523, SSIM 0.9450036239469648, time 3.623797655105591
+Generating image samples for FID evaluation.: 76it [05:42,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:38:00,922 - Case C067: PSNR 39.61516973350771, SSIM 0.9504583795090914, time 3.6252689361572266
+Generating image samples for FID evaluation.: 77it [05:46,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:38:05,353 - Case C067: PSNR 39.54461007195994, SSIM 0.9492796073257626, time 3.627018690109253
+Generating image samples for FID evaluation.: 78it [05:51,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:38:09,793 - Case C067: PSNR 39.29874835763397, SSIM 0.9458943157159686, time 3.6250321865081787
+Generating image samples for FID evaluation.: 79it [05:55,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:38:14,236 - Case C067: PSNR 38.946062533594905, SSIM 0.9517572380653322, time 3.6253607273101807
+Generating image samples for FID evaluation.: 80it [06:00,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:38:18,778 - Case C067: PSNR 38.702398246929356, SSIM 0.9484080551260263, time 3.622238874435425
+Generating image samples for FID evaluation.: 81it [06:05,  4.57s/it]INFO - diffusion.py - 2026-09-29 16:38:23,559 - Case C067: PSNR 38.44824859965851, SSIM 0.9445490075492115, time 3.6234652996063232
+Generating image samples for FID evaluation.: 82it [06:09,  4.53s/it]INFO - diffusion.py - 2026-09-29 16:38:28,002 - Case C067: PSNR 37.304530961404524, SSIM 0.8976690401075482, time 3.6243832111358643
+Generating image samples for FID evaluation.: 83it [06:14,  4.53s/it]INFO - diffusion.py - 2026-09-29 16:38:32,522 - Case C067: PSNR 36.98580472085827, SSIM 0.8947148290030061, time 3.623441457748413
+Generating image samples for FID evaluation.: 84it [06:18,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:38:36,976 - Case C067: PSNR 36.95594303922996, SSIM 0.8928395245218574, time 3.623910903930664
+Generating image samples for FID evaluation.: 85it [06:22,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:38:41,422 - Case C067: PSNR 36.8195800365158, SSIM 0.8989093105700611, time 3.6223933696746826
+Generating image samples for FID evaluation.: 86it [06:27,  4.53s/it]INFO - diffusion.py - 2026-09-29 16:38:46,067 - Case C067: PSNR 38.75040905563299, SSIM 0.9296837167443632, time 3.62309193611145
+Generating image samples for FID evaluation.: 87it [06:32,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:38:50,530 - Case C107: PSNR 39.62107187641245, SSIM 0.94206003151083, time 3.6234850883483887
+Generating image samples for FID evaluation.: 88it [06:36,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:38:55,030 - Case C107: PSNR 39.890375011730825, SSIM 0.9497272080842853, time 3.6232964992523193
+Generating image samples for FID evaluation.: 89it [06:41,  4.56s/it]INFO - diffusion.py - 2026-09-29 16:38:59,692 - Case C107: PSNR 40.05201317118681, SSIM 0.9538433377081753, time 3.6222524642944336
+Generating image samples for FID evaluation.: 90it [06:45,  4.55s/it]INFO - diffusion.py - 2026-09-29 16:39:04,244 - Case C107: PSNR 40.40318026632057, SSIM 0.95970534538728, time 3.622734546661377
+Generating image samples for FID evaluation.: 91it [06:50,  4.53s/it]INFO - diffusion.py - 2026-09-29 16:39:08,711 - Case C107: PSNR 39.93365839698258, SSIM 0.9555898245103955, time 3.6230108737945557
+Generating image samples for FID evaluation.: 92it [06:54,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:39:13,197 - Case C107: PSNR 39.106447048774875, SSIM 0.9483000896295308, time 3.628053665161133
+Generating image samples for FID evaluation.: 93it [06:59,  4.50s/it]INFO - diffusion.py - 2026-09-29 16:39:17,668 - Case C107: PSNR 38.69475635899984, SSIM 0.9426596653524639, time 3.6228179931640625
+Generating image samples for FID evaluation.: 94it [07:03,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:39:22,144 - Case C107: PSNR 38.40781825828337, SSIM 0.9420327770255209, time 3.6253199577331543
+Generating image samples for FID evaluation.: 95it [07:08,  4.50s/it]INFO - diffusion.py - 2026-09-29 16:39:26,645 - Case C107: PSNR 38.20604911556601, SSIM 0.940398985692978, time 3.626330852508545
+Generating image samples for FID evaluation.: 96it [07:12,  4.55s/it]INFO - diffusion.py - 2026-09-29 16:39:31,323 - Case C107: PSNR 38.44459154557276, SSIM 0.9405583367192147, time 3.622845411300659
+Generating image samples for FID evaluation.: 97it [07:17,  4.52s/it]INFO - diffusion.py - 2026-09-29 16:39:35,769 - Case C107: PSNR 37.97780302968413, SSIM 0.9361215818521381, time 3.622992992401123
+Generating image samples for FID evaluation.: 98it [07:21,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:39:40,271 - Case C107: PSNR 38.32911835912857, SSIM 0.9409537483648659, time 3.6241140365600586
+Generating image samples for FID evaluation.: 99it [07:26,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:39:44,756 - Case C107: PSNR 38.04373582206003, SSIM 0.9395493105494381, time 3.625027894973755
+Generating image samples for FID evaluation.: 100it [07:30,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:39:49,222 - Case C107: PSNR 38.81436460016988, SSIM 0.9437670836486817, time 3.623732805252075
+Generating image samples for FID evaluation.: 101it [07:35,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:39:53,677 - Case C107: PSNR 39.01096103411849, SSIM 0.9491740367378594, time 3.622513771057129
+Generating image samples for FID evaluation.: 102it [07:39,  4.52s/it]INFO - diffusion.py - 2026-09-29 16:39:58,275 - Case C107: PSNR 39.33817948181325, SSIM 0.9503154973515868, time 3.623877763748169
+Generating image samples for FID evaluation.: 103it [07:44,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:40:02,711 - Case C107: PSNR 39.53175775645362, SSIM 0.9541410446446539, time 3.6250526905059814
+Generating image samples for FID evaluation.: 104it [07:48,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:40:07,141 - Case C107: PSNR 38.89955344521898, SSIM 0.9433506587225796, time 3.6245086193084717
+Generating image samples for FID evaluation.: 105it [07:53,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:40:11,607 - Case C107: PSNR 39.077745266979505, SSIM 0.9450521221373082, time 3.62510085105896
+Generating image samples for FID evaluation.: 106it [07:57,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:40:16,051 - Case C107: PSNR 39.66181444392917, SSIM 0.9447007719621656, time 3.625814914703369
+Generating image samples for FID evaluation.: 107it [08:02,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:40:20,494 - Case C107: PSNR 39.61248916605707, SSIM 0.9371451981448531, time 3.623749256134033
+Generating image samples for FID evaluation.: 108it [08:06,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:40:24,951 - Case C107: PSNR 39.575710892729404, SSIM 0.9381471730649472, time 3.6232292652130127
+Generating image samples for FID evaluation.: 109it [08:10,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:40:29,409 - Case C107: PSNR 39.493087363057924, SSIM 0.9384789910228253, time 3.6236379146575928
+Generating image samples for FID evaluation.: 110it [08:15,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:40:33,874 - Case C107: PSNR 38.546815768863304, SSIM 0.9200068729152531, time 3.6241838932037354
+Generating image samples for FID evaluation.: 111it [08:19,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:40:38,341 - Case C121: PSNR 35.10052570423118, SSIM 0.8600734019767642, time 3.6233036518096924
+Generating image samples for FID evaluation.: 112it [08:24,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:40:42,809 - Case C121: PSNR 35.876572665927206, SSIM 0.8923227540128827, time 3.6243979930877686
+Generating image samples for FID evaluation.: 113it [08:28,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:40:47,291 - Case C121: PSNR 37.0050935350464, SSIM 0.9220578339543939, time 3.625471591949463
+Generating image samples for FID evaluation.: 114it [08:33,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:40:51,743 - Case C121: PSNR 37.28984006221361, SSIM 0.9241723098224998, time 3.6238608360290527
+Generating image samples for FID evaluation.: 115it [08:37,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:40:56,214 - Case C121: PSNR 37.38203804334837, SSIM 0.9309248508846462, time 3.6257808208465576
+Generating image samples for FID evaluation.: 116it [08:42,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:41:00,635 - Case C121: PSNR 36.57343732281853, SSIM 0.9207371502828002, time 3.623608112335205
+Generating image samples for FID evaluation.: 117it [08:46,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:41:05,071 - Case C121: PSNR 36.635514989420955, SSIM 0.9185953156230748, time 3.626223087310791
+Generating image samples for FID evaluation.: 118it [08:51,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:41:09,584 - Case C121: PSNR 36.515123421894764, SSIM 0.9225909314653279, time 3.626560926437378
+Generating image samples for FID evaluation.: 119it [08:55,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:41:14,025 - Case C121: PSNR 36.605041942072276, SSIM 0.9186658246329129, time 3.6232008934020996
+Generating image samples for FID evaluation.: 120it [08:59,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:41:18,478 - Case C121: PSNR 36.48547607593398, SSIM 0.923723304792911, time 3.6235837936401367
+Generating image samples for FID evaluation.: 121it [09:04,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:41:22,909 - Case C121: PSNR 36.47548309543103, SSIM 0.9182670037125051, time 3.6244068145751953
+Generating image samples for FID evaluation.: 122it [09:08,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:41:27,365 - Case C121: PSNR 36.021658512108225, SSIM 0.9183283558895589, time 3.6233952045440674
+Generating image samples for FID evaluation.: 123it [09:13,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:41:31,866 - Case C121: PSNR 36.16396089633907, SSIM 0.9161647187337576, time 3.623974084854126
+Generating image samples for FID evaluation.: 124it [09:17,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:41:36,316 - Case C121: PSNR 35.876382212050274, SSIM 0.9073769436082841, time 3.6229865550994873
+Generating image samples for FID evaluation.: 125it [09:22,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:41:40,783 - Case C121: PSNR 36.34061313809266, SSIM 0.918845595846355, time 3.623073101043701
+Generating image samples for FID evaluation.: 126it [09:26,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:41:45,237 - Case C121: PSNR 37.19906124247267, SSIM 0.9247894516559244, time 3.627516746520996
+Generating image samples for FID evaluation.: 127it [09:31,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:41:49,700 - Case C121: PSNR 37.53713700993347, SSIM 0.9297121564698815, time 3.624102830886841
+Generating image samples for FID evaluation.: 128it [09:35,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:41:54,145 - Case C121: PSNR 37.60480145062151, SSIM 0.9297312761748135, time 3.6248459815979004
+Generating image samples for FID evaluation.: 129it [09:40,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:41:58,622 - Case C121: PSNR 37.517320766631606, SSIM 0.934442492678851, time 3.629575729370117
+Generating image samples for FID evaluation.: 130it [09:44,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:42:03,053 - Case C121: PSNR 37.00652300895713, SSIM 0.936225121331632, time 3.624049425125122
+Generating image samples for FID evaluation.: 131it [09:49,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:42:07,538 - Case C121: PSNR 36.9270442051428, SSIM 0.9007103417374791, time 3.623340368270874
+Generating image samples for FID evaluation.: 132it [09:53,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:42:11,979 - Case C121: PSNR 36.42259075693609, SSIM 0.8900408586317003, time 3.6246392726898193
+Generating image samples for FID evaluation.: 133it [09:57,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:42:16,429 - Case C121: PSNR 35.877431256812706, SSIM 0.8745978556391001, time 3.624080181121826
+Generating image samples for FID evaluation.: 134it [10:02,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:42:20,863 - Case C121: PSNR 35.542707803502786, SSIM 0.862613470171511, time 3.6240508556365967
+Generating image samples for FID evaluation.: 135it [10:06,  4.45s/it]INFO - diffusion.py - 2026-09-29 16:42:25,309 - Case C121: PSNR 37.90451588805519, SSIM 0.914207095673442, time 3.6240928173065186
+Generating image samples for FID evaluation.: 136it [10:11,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:42:29,791 - Case C160: PSNR 38.92209840623007, SSIM 0.9440415821501018, time 3.625014066696167
+Generating image samples for FID evaluation.: 137it [10:15,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:42:34,240 - Case C160: PSNR 37.8887729598371, SSIM 0.9283554445520042, time 3.623332977294922
+Generating image samples for FID evaluation.: 138it [10:20,  4.52s/it]INFO - diffusion.py - 2026-09-29 16:42:38,901 - Case C160: PSNR 37.185057548842956, SSIM 0.9137974325989187, time 3.6244168281555176
+Generating image samples for FID evaluation.: 139it [10:24,  4.50s/it]INFO - diffusion.py - 2026-09-29 16:42:43,348 - Case C160: PSNR 37.499514144813084, SSIM 0.9235260919179916, time 3.622568130493164
+Generating image samples for FID evaluation.: 140it [10:29,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:42:47,833 - Case C160: PSNR 37.988936592145606, SSIM 0.9251042748996317, time 3.624239206314087
+Generating image samples for FID evaluation.: 141it [10:33,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:42:52,301 - Case C160: PSNR 38.26186486488654, SSIM 0.9325221896049679, time 3.62695574760437
+Generating image samples for FID evaluation.: 142it [10:38,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:42:56,766 - Case C160: PSNR 38.15439650453687, SSIM 0.925129873057902, time 3.6236355304718018
+Generating image samples for FID evaluation.: 143it [10:43,  4.82s/it]INFO - diffusion.py - 2026-09-29 16:43:02,381 - Case C160: PSNR 38.57602363095109, SSIM 0.9342936579798461, time 3.622819185256958
+Generating image samples for FID evaluation.: 144it [10:48,  4.71s/it]INFO - diffusion.py - 2026-09-29 16:43:06,850 - Case C160: PSNR 38.44331484984494, SSIM 0.9315094773045777, time 3.6246228218078613
+Generating image samples for FID evaluation.: 145it [10:52,  4.64s/it]INFO - diffusion.py - 2026-09-29 16:43:11,309 - Case C160: PSNR 38.81593377446472, SSIM 0.934610697463572, time 3.624872922897339
+Generating image samples for FID evaluation.: 146it [10:57,  4.59s/it]INFO - diffusion.py - 2026-09-29 16:43:15,783 - Case C160: PSNR 38.976786688773565, SSIM 0.941017900922656, time 3.6235415935516357
+Generating image samples for FID evaluation.: 147it [11:01,  4.59s/it]INFO - diffusion.py - 2026-09-29 16:43:20,380 - Case C160: PSNR 39.107995940766486, SSIM 0.9383371873742641, time 3.6248865127563477
+Generating image samples for FID evaluation.: 148it [11:06,  4.56s/it]INFO - diffusion.py - 2026-09-29 16:43:24,855 - Case C160: PSNR 39.52691642582365, SSIM 0.9484823820279241, time 3.6224985122680664
+Generating image samples for FID evaluation.: 149it [11:10,  4.52s/it]INFO - diffusion.py - 2026-09-29 16:43:29,302 - Case C160: PSNR 39.42972238835416, SSIM 0.9415527509147822, time 3.6230897903442383
+Generating image samples for FID evaluation.: 150it [11:15,  4.50s/it]INFO - diffusion.py - 2026-09-29 16:43:33,748 - Case C160: PSNR 37.46887214051729, SSIM 0.8967007457097171, time 3.6231608390808105
+Generating image samples for FID evaluation.: 151it [11:19,  4.50s/it]INFO - diffusion.py - 2026-09-29 16:43:38,238 - Case C160: PSNR 36.56073124267448, SSIM 0.8893128789834381, time 3.624375581741333
+Generating image samples for FID evaluation.: 152it [11:24,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:43:42,687 - Case C160: PSNR 36.86166351494259, SSIM 0.8960706252046228, time 3.6290283203125
+Generating image samples for FID evaluation.: 153it [11:28,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:43:47,157 - Case C160: PSNR 37.358756200508594, SSIM 0.9112265914350747, time 3.623152017593384
+Generating image samples for FID evaluation.: 154it [11:33,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:43:51,609 - Case C160: PSNR 38.050982825611214, SSIM 0.9224687888462544, time 3.6261110305786133
+Generating image samples for FID evaluation.: 155it [11:37,  4.55s/it]INFO - diffusion.py - 2026-09-29 16:43:56,354 - Case C227: PSNR 36.71157758232371, SSIM 0.8991440552363693, time 3.6281497478485107
+Generating image samples for FID evaluation.: 156it [11:42,  4.53s/it]INFO - diffusion.py - 2026-09-29 16:44:00,816 - Case C227: PSNR 36.40866450057301, SSIM 0.9008065796918123, time 3.623830795288086
+Generating image samples for FID evaluation.: 157it [11:46,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:44:05,292 - Case C227: PSNR 36.716441200477476, SSIM 0.9001604641605019, time 3.624408721923828
+Generating image samples for FID evaluation.: 158it [11:51,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:44:09,744 - Case C227: PSNR 36.58223408826225, SSIM 0.902658077924758, time 3.6228694915771484
+Generating image samples for FID evaluation.: 159it [11:55,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:44:14,211 - Case C227: PSNR 36.4241071509125, SSIM 0.8966189904136955, time 3.6223740577697754
+Generating image samples for FID evaluation.: 160it [12:00,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:44:18,709 - Case C227: PSNR 36.84680187917366, SSIM 0.9075956927728951, time 3.6239418983459473
+Generating image samples for FID evaluation.: 161it [12:04,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:44:23,271 - Case C227: PSNR 36.76705080334308, SSIM 0.9003957067960798, time 3.62556791305542
+Generating image samples for FID evaluation.: 162it [12:09,  4.50s/it]INFO - diffusion.py - 2026-09-29 16:44:27,744 - Case C227: PSNR 37.3841295444292, SSIM 0.9175981685943304, time 3.6231260299682617
+Generating image samples for FID evaluation.: 163it [12:13,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:44:32,204 - Case C227: PSNR 37.557627048415206, SSIM 0.91969128480643, time 3.6228606700897217
+Generating image samples for FID evaluation.: 164it [12:18,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:44:36,763 - Case C227: PSNR 38.22185981975331, SSIM 0.9308546281264425, time 3.6234357357025146
+Generating image samples for FID evaluation.: 165it [12:22,  4.50s/it]INFO - diffusion.py - 2026-09-29 16:44:41,237 - Case C227: PSNR 38.33950475695011, SSIM 0.9296016656867864, time 3.6283669471740723
+Generating image samples for FID evaluation.: 166it [12:27,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:44:45,777 - Case C227: PSNR 37.93491507521274, SSIM 0.9248371512236594, time 3.624516487121582
+Generating image samples for FID evaluation.: 167it [12:31,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:44:50,226 - Case C227: PSNR 38.23424845342547, SSIM 0.9295950390709936, time 3.6268880367279053
+Generating image samples for FID evaluation.: 168it [12:36,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:44:54,674 - Case C227: PSNR 37.615053094233254, SSIM 0.9156322525906115, time 3.626009225845337
+Generating image samples for FID evaluation.: 169it [12:40,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:44:59,116 - Case C227: PSNR 34.84643123825802, SSIM 0.8304148620987533, time 3.6245551109313965
+Generating image samples for FID evaluation.: 170it [12:45,  4.54s/it]INFO - diffusion.py - 2026-09-29 16:45:03,817 - Case C227: PSNR 34.555893384321, SSIM 0.8332431686735376, time 3.6252286434173584
+Generating image samples for FID evaluation.: 171it [12:49,  4.53s/it]INFO - diffusion.py - 2026-09-29 16:45:08,330 - Case C227: PSNR 35.27255507254571, SSIM 0.85407887728066, time 3.6233010292053223
+Generating image samples for FID evaluation.: 172it [12:54,  4.52s/it]INFO - diffusion.py - 2026-09-29 16:45:12,812 - Case C227: PSNR 36.1027065197151, SSIM 0.8793047726686671, time 3.6245791912078857
+Generating image samples for FID evaluation.: 173it [12:58,  4.50s/it]INFO - diffusion.py - 2026-09-29 16:45:17,271 - Case C227: PSNR 36.509173623202045, SSIM 0.8923121523010731, time 3.623077392578125
+Generating image samples for FID evaluation.: 174it [13:03,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:45:21,741 - Case C249: PSNR 39.036731292078954, SSIM 0.9406728635017871, time 3.6241180896759033
+Generating image samples for FID evaluation.: 175it [13:07,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:45:26,211 - Case C249: PSNR 38.50683454395706, SSIM 0.9336543133418858, time 3.627734422683716
+Generating image samples for FID evaluation.: 176it [13:12,  4.50s/it]INFO - diffusion.py - 2026-09-29 16:45:30,731 - Case C249: PSNR 37.747647386257505, SSIM 0.9293031207461954, time 3.623117685317993
+Generating image samples for FID evaluation.: 177it [13:16,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:45:35,195 - Case C249: PSNR 37.15580594777044, SSIM 0.9233722580056787, time 3.6257383823394775
+Generating image samples for FID evaluation.: 178it [13:21,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:45:39,668 - Case C249: PSNR 36.940857034010975, SSIM 0.920263602050662, time 3.628645658493042
+Generating image samples for FID evaluation.: 179it [13:25,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:45:44,149 - Case C249: PSNR 36.69389588070289, SSIM 0.9210397280798257, time 3.625511884689331
+Generating image samples for FID evaluation.: 180it [13:30,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:45:48,631 - Case C249: PSNR 37.08644236534737, SSIM 0.9209640522591176, time 3.6242635250091553
+Generating image samples for FID evaluation.: 181it [13:34,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:45:53,109 - Case C249: PSNR 37.27280671043283, SSIM 0.9321183099117876, time 3.6238250732421875
+Generating image samples for FID evaluation.: 182it [13:39,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:45:57,573 - Case C249: PSNR 38.06263854270862, SSIM 0.9342935755635201, time 3.6252071857452393
+Generating image samples for FID evaluation.: 183it [13:43,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:46:02,026 - Case C249: PSNR 38.78148488777835, SSIM 0.9453375301211475, time 3.6247687339782715
+Generating image samples for FID evaluation.: 184it [13:47,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:46:06,484 - Case C249: PSNR 39.20382067520757, SSIM 0.9462946022197304, time 3.6238183975219727
+Generating image samples for FID evaluation.: 185it [13:52,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:46:10,995 - Case C249: PSNR 39.74976182874904, SSIM 0.9521859023920894, time 3.623218536376953
+Generating image samples for FID evaluation.: 186it [13:56,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:46:15,445 - Case C249: PSNR 39.470117562309, SSIM 0.9497780676012634, time 3.6238605976104736
+Generating image samples for FID evaluation.: 187it [14:01,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:46:19,890 - Case C249: PSNR 38.96373719101364, SSIM 0.9377582208298744, time 3.6236815452575684
+Generating image samples for FID evaluation.: 188it [14:05,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:46:24,376 - Case C249: PSNR 39.043012494428055, SSIM 0.9419975087931156, time 3.6246073246002197
+Generating image samples for FID evaluation.: 189it [14:10,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:46:28,848 - Case C249: PSNR 38.82841028800838, SSIM 0.9390072835722865, time 3.63086199760437
+Generating image samples for FID evaluation.: 190it [14:14,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:46:33,299 - Case C249: PSNR 39.09669262153643, SSIM 0.9450018316717743, time 3.6261541843414307
+Generating image samples for FID evaluation.: 191it [14:19,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:46:37,752 - Case C249: PSNR 37.408117562050414, SSIM 0.9050491555513144, time 3.6284003257751465
+Generating image samples for FID evaluation.: 192it [14:23,  4.46s/it]INFO - diffusion.py - 2026-09-29 16:46:42,213 - Case C249: PSNR 37.0141794399359, SSIM 0.8961627372790277, time 3.624511241912842
+Generating image samples for FID evaluation.: 193it [14:28,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:46:46,718 - Case C249: PSNR 37.30607675883964, SSIM 0.9065242158349751, time 3.6246256828308105
+Generating image samples for FID evaluation.: 194it [14:32,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:46:51,175 - Case C249: PSNR 37.86608428362411, SSIM 0.9152538634963334, time 3.623345136642456
+Generating image samples for FID evaluation.: 195it [14:37,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:46:55,660 - Case C249: PSNR 36.381935867241594, SSIM 0.8726225349395274, time 3.62453293800354
+Generating image samples for FID evaluation.: 196it [14:41,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:47:00,122 - Case C280: PSNR 31.544283145840268, SSIM 0.733370167474702, time 3.624006748199463
+Generating image samples for FID evaluation.: 197it [14:46,  4.48s/it]INFO - diffusion.py - 2026-09-29 16:47:04,611 - Case C280: PSNR 32.63931134169547, SSIM 0.789755748157367, time 3.624826192855835
+Generating image samples for FID evaluation.: 198it [14:50,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:47:09,072 - Case C280: PSNR 33.972440672760094, SSIM 0.8479638542636185, time 3.623868703842163
+Generating image samples for FID evaluation.: 199it [14:55,  4.47s/it]INFO - diffusion.py - 2026-09-29 16:47:13,537 - Case C280: PSNR 34.90223294294039, SSIM 0.8753198098014744, time 3.6236648559570312
+Generating image samples for FID evaluation.: 200it [14:59,  4.52s/it]INFO - diffusion.py - 2026-09-29 16:47:18,172 - Case C280: PSNR 34.41456845004181, SSIM 0.8743919776908755, time 3.6291911602020264
+Generating image samples for FID evaluation.: 201it [15:04,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:47:22,662 - Case C280: PSNR 33.367102672459765, SSIM 0.8438617849283218, time 3.6282565593719482
+Generating image samples for FID evaluation.: 202it [15:08,  4.50s/it]INFO - diffusion.py - 2026-09-29 16:47:27,143 - Case C280: PSNR 32.70950894601353, SSIM 0.8306954981110423, time 3.6260693073272705
+Generating image samples for FID evaluation.: 203it [15:14,  4.95s/it]INFO - diffusion.py - 2026-09-29 16:47:33,136 - Case C280: PSNR 32.25552853526984, SSIM 0.8255414617305046, time 3.6220815181732178
+Generating image samples for FID evaluation.: 204it [15:19,  4.80s/it]INFO - diffusion.py - 2026-09-29 16:47:37,603 - Case C280: PSNR 32.76421391587492, SSIM 0.8282915419957322, time 3.6228528022766113
+Generating image samples for FID evaluation.: 205it [15:23,  4.70s/it]INFO - diffusion.py - 2026-09-29 16:47:42,063 - Case C280: PSNR 32.83567181849222, SSIM 0.8368838146450941, time 3.6229875087738037
+Generating image samples for FID evaluation.: 206it [15:28,  4.74s/it]INFO - diffusion.py - 2026-09-29 16:47:46,884 - Case C280: PSNR 33.3053991941412, SSIM 0.8432831374370187, time 3.6232998371124268
+Generating image samples for FID evaluation.: 207it [15:32,  4.66s/it]INFO - diffusion.py - 2026-09-29 16:47:51,367 - Case C280: PSNR 34.101264580373574, SSIM 0.8655810807691271, time 3.6229658126831055
+Generating image samples for FID evaluation.: 208it [15:37,  4.60s/it]INFO - diffusion.py - 2026-09-29 16:47:55,834 - Case C280: PSNR 34.18869490174127, SSIM 0.8646545462349401, time 3.6240880489349365
+Generating image samples for FID evaluation.: 209it [15:41,  4.56s/it]INFO - diffusion.py - 2026-09-29 16:48:00,308 - Case C280: PSNR 35.52313132712025, SSIM 0.8862127170037739, time 3.6227242946624756
+Generating image samples for FID evaluation.: 210it [15:46,  4.54s/it]INFO - diffusion.py - 2026-09-29 16:48:04,785 - Case C280: PSNR 36.209705409089814, SSIM 0.9033159400719656, time 3.625908136367798
+Generating image samples for FID evaluation.: 211it [15:50,  4.52s/it]INFO - diffusion.py - 2026-09-29 16:48:09,273 - Case C280: PSNR 35.617983478385376, SSIM 0.8903320429276973, time 3.623494863510132
+Generating image samples for FID evaluation.: 212it [15:55,  4.55s/it]INFO - diffusion.py - 2026-09-29 16:48:13,885 - Case C280: PSNR 35.75913081410706, SSIM 0.9002676408757427, time 3.62363862991333
+Generating image samples for FID evaluation.: 213it [15:59,  4.53s/it]INFO - diffusion.py - 2026-09-29 16:48:18,359 - Case C280: PSNR 35.75820285554221, SSIM 0.8941969915211436, time 3.6258325576782227
+Generating image samples for FID evaluation.: 214it [16:04,  4.51s/it]INFO - diffusion.py - 2026-09-29 16:48:22,817 - Case C280: PSNR 33.403858621723, SSIM 0.811456720848657, time 3.6234347820281982
+Generating image samples for FID evaluation.: 215it [16:08,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:48:27,277 - Case C280: PSNR 32.46326901594118, SSIM 0.7564114822375403, time 3.6232566833496094
+Generating image samples for FID evaluation.: 216it [16:13,  4.49s/it]INFO - diffusion.py - 2026-09-29 16:48:31,760 - Case C280: PSNR 32.2816967410427, SSIM 0.7499784198701372, time 3.623836040496826
+Generating image samples for FID evaluation.: 217it [16:18,  4.84s/it]INFO - diffusion.py - 2026-09-29 16:48:37,434 - Case C280: PSNR 32.27353465750212, SSIM 0.7489674400827736, time 3.6248459815979004
+Generating image samples for FID evaluation.: 218it [16:23,  4.73s/it]INFO - diffusion.py - 2026-09-29 16:48:42,361 - Case C280: PSNR 32.008151050347685, SSIM 0.7406630966769548, time 4.099385499954224
+Generating image samples for FID evaluation.: 219it [16:28,  4.75s/it]Generating image samples for FID evaluation.: 219it [16:28,  4.51s/it]
+INFO - diffusion.py - 2026-09-29 16:48:43,024 - Average: PSNR 37.45772450505664, SSIM 0.9155476046635611, time 3.624012816336847

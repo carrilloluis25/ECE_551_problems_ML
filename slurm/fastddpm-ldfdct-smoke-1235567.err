@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/users/lc2025/ECE_551_problems_ML/fast-ddpm/fast_ddpm_main.py", line 12, in <module>
+    from runners.diffusion import Diffusion
+  File "/users/lc2025/ECE_551_problems_ML/fast-ddpm/runners/diffusion.py", line 7, in <module>
+    import pandas as pd
+ModuleNotFoundError: No module named 'pandas'

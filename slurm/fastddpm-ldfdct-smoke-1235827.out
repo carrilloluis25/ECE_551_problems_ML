@@ -1,0 +1,5 @@
+Start inference on model of 1 steps
+starting from image 0
+Start training model on LDFDCT dataset.
+The inference sample type is generalized. The scheduler sampling type is uniform. The number of involved time steps is 10 out of 1000.
+The length of test set is: 3501

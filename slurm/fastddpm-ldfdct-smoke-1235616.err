@@ -1,0 +1,38 @@
+INFO - fast_ddpm_main.py - 2026-09-29 16:13:53,134 - Using device: cuda
+INFO - fast_ddpm_main.py - 2026-09-29 16:13:53,138 - Writing log file to /users/lc2025/carc-scratch/fastddpm-exp/logs/ldfdct_smoke_test
+INFO - fast_ddpm_main.py - 2026-09-29 16:13:53,138 - Exp instance id = 2319157
+INFO - fast_ddpm_main.py - 2026-09-29 16:13:53,138 - Exp comment = 
+Generating image samples for FID evaluation.: 0it [00:00, ?it/s]Generating image samples for FID evaluation.: 0it [00:19, ?it/s]
+ERROR - fast_ddpm_main.py - 2026-09-29 16:14:40,281 - Traceback (most recent call last):
+  File "/users/lc2025/ECE_551_problems_ML/fast-ddpm/fast_ddpm_main.py", line 232, in main
+    runner.sg_sample()
+  File "/users/lc2025/ECE_551_problems_ML/fast-ddpm/runners/diffusion.py", line 652, in sg_sample
+    self.sg_sample_fid(model)
+  File "/users/lc2025/ECE_551_problems_ML/fast-ddpm/runners/diffusion.py", line 796, in sg_sample_fid
+    x = self.sg_sample_image(x, x_img, model)
+  File "/users/lc2025/ECE_551_problems_ML/fast-ddpm/runners/diffusion.py", line 918, in sg_sample_image
+    xs = sg_generalized_steps(x, x_img, seq, model, self.betas, eta=self.args.eta)
+  File "/users/lc2025/ECE_551_problems_ML/fast-ddpm/functions/denoising.py", line 149, in sg_generalized_steps
+    et = model(torch.cat([x_img, xt], dim=1), t)
+  File "/users/lc2025/.conda/envs/fastddpm/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/users/lc2025/.conda/envs/fastddpm/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/users/lc2025/.conda/envs/fastddpm/lib/python3.10/site-packages/torch/nn/parallel/data_parallel.py", line 183, in forward
+    return self.module(*inputs[0], **module_kwargs[0])
+  File "/users/lc2025/.conda/envs/fastddpm/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/users/lc2025/.conda/envs/fastddpm/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/users/lc2025/ECE_551_problems_ML/fast-ddpm/models/diffusion.py", line 331, in forward
+    h = self.up[i_level].block[i_block](
+  File "/users/lc2025/.conda/envs/fastddpm/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/users/lc2025/.conda/envs/fastddpm/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/users/lc2025/ECE_551_problems_ML/fast-ddpm/models/diffusion.py", line 118, in forward
+    h = nonlinearity(h)
+  File "/users/lc2025/ECE_551_problems_ML/fast-ddpm/models/diffusion.py", line 29, in nonlinearity
+    return x*torch.sigmoid(x)
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 8.00 GiB. GPU 0 has a total capacity of 44.40 GiB of which 5.57 GiB is free. Including non-PyTorch memory, this process has 38.83 GiB memory in use. Of the allocated memory 38.32 GiB is allocated by PyTorch, and 5.00 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+
