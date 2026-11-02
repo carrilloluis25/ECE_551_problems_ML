@@ -55,7 +55,7 @@ numbers are in [docs/easley_cluster_notes.md](docs/easley_cluster_notes.md).
 | Inference reproduction (LDFDCT, pretrained checkpoint, full test set) | Done |
 | Training smoke test (loop runs, checkpoints save) | Done: batch 8 at ~0.51 s/step; batch 16 runs out of memory on the L40S |
 | Resume-from-checkpoint test | Done: continued from the saved step, loss in range |
-| Batch-size limit test (L40S) | Done: limit is batch 14 in fp32; ~15.6 images/s at every batch size. H100 trains ~2.5x to 2.9x faster (44 to 46 images/s); H100 batch ceiling: **empty** |
+| Batch-size limit test (L40S) | Done: limit is batch 14 in fp32; ~15.6 images/s at every batch size. H100 trains ~2.5x to 2.9x faster (~47 images/s) and fits the paper's batch 16 (no out-of-memory up to 32) |
 | HPC roadmap phases 0-6 | Phase 0 partial; Phases 1-6 **empty** |
 | Full training reproduction | **empty** |
 | Extension (new dataset / hardware comparison / GDM-VE) | **empty** |

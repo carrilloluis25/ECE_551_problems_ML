@@ -39,8 +39,8 @@ Then, inside an allocation on the H100 partition: `nvidia-smi`,
 `nvidia-smi topo -m`, and
 `python -c "import torch; print(torch.cuda.get_device_name(0), torch.cuda.get_device_capability(0))"`
 (expect capability (9, 0); PyTorch 2.2.2 + cu121 should support it).
-Each H100 has 80 GB, the same as the paper's A100s, so the paper's batch size of
-16 may fit (**unverified**; the batch-size test will show it).
+Memory per H100 is **at least ~92 GiB**, not 80 GB: a training run read 94,133 MiB in use
+(see the batch-size test). The paper's batch size of 16 fits (confirmed).
 
 ## 2. Partitions (`sinfo`)
 
@@ -144,18 +144,16 @@ Findings:
   parameter for roughly 100M parameters (**interpretation**; Phase 0's parameter
   count will confirm).
 - **Extrapolation (computed, untested):** batch 16 needs about 53 GB, which
-  explains the out-of-memory error. On an 80 GB H100 the same arithmetic puts the
-  fp32 ceiling near batch 23 to 24, so batch 16 should fit. (The H100 memory readings turned out unreliable; see the H100 section below.)
+  explains the out-of-memory error. On the H100 the same slope held from batch 14 to 28 (see the H100 section below), and the paper's batch 16 fits there.
 - **Cost estimate (computed):** the paper's 400,000 steps at batch 16 take about
   112 hours on one L40S (400,000 x 16 x 0.063 s).
 
 ### Batch-size test on H100 (easley053, default PyTorch settings)
 
-Provenance: run with the original script, before the GPU-tagged version was copied
-to the cluster. It used the fixed sizes 4, 8, 10, 12 and 14, wrote untagged
-`bs_result_<N>.txt`, and **overwrote the L40S result files** (the L40S table above
-is the saved original). Batch 10 came from array job 1398670 (task 2), the rest
-from array job 1398689. Two tasks shared the node's 2 H100s at a time.
+Sizes 4 to 14 ran first with the original (untagged) script, which overwrote the L40S
+result files (the L40S table above is the saved original; files were later renamed
+`bs_result_<GPU>_bs<N>.txt`). Sizes 16 to 32 ran with the GPU-tagged script (array
+1398837). Two tasks could share the node's 2 H100s.
 
 | Batch | s/step | images/s | Peak (MiB, nvidia-smi) | Throughput vs L40S |
 |---:|---:|---:|---:|---:|
@@ -164,24 +162,33 @@ from array job 1398689. Two tasks shared the node's 2 H100s at a time.
 | 10 | 0.223 | 44.8 | 49,657 | 2.9x |
 | 12 | 0.261 | 46.0 | 41,629 | 2.9x |
 | 14 | 0.303 | 46.2 | 46,709 | 2.9x |
+| 16 | 0.342 | 46.8 | 52,743 | (L40S out of memory) |
+| 20 | 0.426 | 46.9 | 65,269 | |
+| 24 | 0.500 | 48.0 | 77,697 | |
+| 28 | 0.585 | 47.9 | 89,917 | |
+| 32 | 0.658 | 48.6 | 94,133 | |
 
 Findings:
+- **No out-of-memory up to batch 32.** The H100's ceiling is above 32 and still
+  unmeasured. The paper's batch of 16 fits with room to spare (about 53 GB).
+- **The cards have more than 80 GB.** `nvidia-smi` reported 94,133 MiB in use at batch 32,
+  so memory.total is at least ~92 GiB. This is consistent with an H100 NVL (94 GB)
+  (**unverified**; confirm with
+  `nvidia-smi --query-gpu=name,memory.total --format=csv`, which the new script also prints
+  at the top of each task's `.out`). An earlier note here assuming 80 GB was wrong.
 - **The H100 trains about 2.5x to 2.9x faster than the L40S** at the same batch size
-  (images/s ratio, **computed**).
-- **Throughput rises with batch size** (38 to 46 images/s from batch 4 to 12) and then
-  flattens, unlike the L40S, which was flat from batch 4. The H100 is not saturated at
-  small batches.
-- **The `nvidia-smi` memory readings are not reliable on the H100.** Batch 8 reads
-  46.5 GB (L40S: 28.1 GB), and batch 12 reads less than batch 8. A likely cause
-  (**interpretation, unverified**) is PyTorch's caching allocator plus
-  `cudnn.benchmark = True` in `fast_ddpm_main.py`, which can reserve large workspaces
-  when memory is available. Real memory need requires
-  `torch.cuda.max_memory_allocated()` (Phase 0).
-- **The H100's batch ceiling is unmeasured.** Nothing above 14 was tested, so the
-  earlier estimate of about batch 23 to 24 is now doubtful.
-- **Cost estimate (computed):** if batch 16 fits and throughput stays near 46 images/s,
-  400,000 steps at batch 16 (6.4M images) take about 39 hours on one H100, against
-  about 112 hours on one L40S.
+  (images/s, **computed**).
+- **Throughput saturates around batch 12 to 16** at about 47 images/s. Going from batch 16 to
+  32 adds only about 4%, so a larger batch is not a speed lever, only a memory/semantics choice.
+- **Memory is linear in batch size from 14 up:** about 3.1 GB per image
+  (52.7 GB at 16 to 89.9 GB at 28), matching the L40S slope (**computed**). Small batches
+  (8, 10) read high, likely from PyTorch's caching and cuDNN benchmark mode
+  (**interpretation, unverified**), and batch 32 sits at the card's limit. The `nvidia-smi`
+  column is only a rough guide; `torch.cuda.max_memory_allocated()` is the reliable number.
+- **Cost estimate (computed):** the paper's 400,000 steps at batch 16 take about
+  400,000 x 0.342 s = 38 hours on one H100, plus roughly 1 hour of checkpoint writes if
+  saved every 5,000 steps. That fits inside one 2-day `h100` job. It assumes the speed holds
+  and the job is not interrupted (against about 112 hours on one L40S).
 
 ## 6. Hopper
 
