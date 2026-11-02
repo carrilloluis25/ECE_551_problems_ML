@@ -1,0 +1,1 @@
+batch=10 status=OK steps_logged=296 median_s_per_step=0.641 images_per_s=15.6 peak_gpu_mem_MiB=34489

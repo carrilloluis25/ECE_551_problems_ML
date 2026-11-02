@@ -1,0 +1,4 @@
+.DS_Store
+slurm/*.out
+slurm/*.err
+slurm/bs_mem_*.csv

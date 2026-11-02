@@ -20,10 +20,14 @@ experiments can be replicated by others on the same cluster.
 
 1. Reproduce Fast-DDPM's published results on our own cluster environment.
 2. Build a reusable HPC workflow (environment, SLURM scripts, checkpoint/resume).
-3. Extend the work. Direction for the extension: **empty**
-   (candidates in [docs/ROADMAP.md](docs/ROADMAP.md)).
+3. Make Fast-DDPM training and inference as fast as possible on Easley while
+   holding quality at the reproduced 37.46 dB PSNR / 0.9155 SSIM. This is a
+   7-phase HPC roadmap (profiling, sharded inference, single-GPU efficiency, DDP,
+   multi-node scaling, experiments at scale, 3D):
+   [docs/ROADMAP.md](docs/ROADMAP.md).
 4. Write a tutorial that lets a new lab member repeat the pipeline from a clean
-   account: [docs/hpc_tutorial.md](docs/hpc_tutorial.md).
+   account: [docs/hpc_tutorial.md](docs/hpc_tutorial.md) (full) and
+   [docs/hpc_quickstart.md](docs/hpc_quickstart.md) (one page).
 
 ## Compute environment
 
@@ -32,14 +36,15 @@ experiments can be replicated by others on the same cluster.
 | Cluster | Easley (UNM Alliance HPC) |
 | GPUs used so far | NVIDIA L40S (46 GB) |
 | H100 usage | **empty** |
-| Hopper (A100) | Not reachable from this account |
+| Hopper (A100) | No login found yet; the account lists Hopper QOS names, so access is **unverified** |
 | Python / PyTorch | 3.10.6 / 2.2.2 (cu121), conda env `fastddpm` |
-| Scheduler | SLURM (`interactive`, `general`, `debug`, `scavenger` partitions) |
+| Scheduler | SLURM (`interactive`, `general`, `debug`, `scavenger` partitions). `interactive` allows 1 node per user; `easley-general` caps users at 512 CPUs with no explicit GPU cap |
 | Scratch | `~/carc-scratch` (data and checkpoints live here, not in the repo) |
 
 The paper pins PyTorch 1.12.1 on A100s. That version has no kernels for L40S or
 H100, so this project uses PyTorch 2.2.2. Details and the dependency fixes this
-required are in the tutorial.
+required are in the tutorial. Scheduler limits, storage layout and measured
+numbers are in [docs/easley_cluster_notes.md](docs/easley_cluster_notes.md).
 
 ## Status
 
@@ -48,10 +53,12 @@ required are in the tutorial.
 | Cluster access, SSH/git auth, repo and Fast-DDPM fork added as submodule | Done |
 | Conda environment working on L40S | Done |
 | Inference reproduction (LDFDCT, pretrained checkpoint, full test set) | Done |
-| Training smoke test (checkpoint saving) | **empty** |
-| Resume-from-checkpoint test | **empty** |
+| Training smoke test (loop runs, checkpoints save) | Done: batch 8 at ~0.51 s/step; batch 16 runs out of memory on the L40S |
+| Resume-from-checkpoint test | Done: continued from the saved step, loss in range |
+| Batch-size limit test (4, 8, 10, 12, 14) | Script written; results **empty** |
+| HPC roadmap phases 0-6 | Phase 0 partial; Phases 1-6 **empty** |
 | Full training reproduction | **empty** |
-| Extension (new dataset / sweep / hardware comparison / GDM-VE) | **empty** |
+| Extension (new dataset / hardware comparison / GDM-VE) | **empty** |
 
 ### Results
 
@@ -71,11 +78,18 @@ own training reproduces the paper.
 ECE_551_problems_ML/
 ├── README.md
 ├── docs/
-│   ├── ROADMAP.md          # two-semester plan and open decisions
-│   └── hpc_tutorial.md     # cluster setup, workflow, troubleshooting log
+│   ├── ROADMAP.md              # plan, 7-phase HPC roadmap, themes checklist, open decisions
+│   ├── hpc_tutorial.md         # full cluster setup, workflow, troubleshooting log
+│   ├── hpc_quickstart.md       # one-page version of the tutorial
+│   ├── easley_cluster_notes.md # partitions, QOS limits, storage, measured numbers
+│   ├── fast_ddpm_theory.md     # theory notes on the paper
+│   ├── fast_ddpm_code_notes.pdf    # 24-slide code walkthrough
+│   └── code_notes_src/build.py     # generates the slides
 ├── slurm/
 │   ├── ldfdct_smoke_test.sh        # inference run on the full LDFDCT test set
-│   └── ldfdct_train_smoke.sh       # short training run for the training smoke test
+│   ├── ldfdct_train_smoke.sh       # short training run
+│   ├── ldfdct_train_resume.sh      # resume test (same run plus --resume_training)
+│   └── bs_limit_test.sh            # batch-size limit job array
 └── fast-ddpm/              # git submodule: our fork of mirthAI/Fast-DDPM
 ```
 
@@ -102,9 +116,10 @@ sbatch slurm/ldfdct_smoke_test.sh
 
 ## Open questions
 
-- Which task to use for the full training reproduction: **empty**
-- Semester 2 direction: **empty**
-- Compute budget / allocation limits on Easley: **empty**
+- Learning rate: the paper says 2e-4, the repo configs say 2e-5. Which one: **empty**
+- Extension after the HPC roadmap: **empty**
+- GPU-hour allocation and multi-node limits on Easley: **empty**
+- Hopper access: **empty**
 - Advisor / course deliverable format: **empty**
 
 ## Acknowledgements

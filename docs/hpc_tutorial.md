@@ -35,6 +35,9 @@ scontrol show node <nodename> | grep -i gres
 allocations come through faster. Reserve H100 time for when you specifically
 need it.
 
+Full scheduler, QOS-limit, storage and measured-performance notes, with the
+commands used to find each one: [easley_cluster_notes.md](easley_cluster_notes.md).
+
 ## 2. Account setup: SSH keys and Git/GitHub auth
 
 These are the steps we worked through getting `ECE_551_problems_ML` pushed to

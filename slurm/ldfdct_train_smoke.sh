@@ -4,7 +4,7 @@
 #SBATCH --gres=gpu:l40s:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
-#SBATCH --time=00:20:00
+#SBATCH --time=00:10:00
 #SBATCH --output=fastddpm-ldfdct-train-smoke-%j.out
 #SBATCH --error=fastddpm-ldfdct-train-smoke-%j.err
 
