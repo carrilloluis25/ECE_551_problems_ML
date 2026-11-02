@@ -46,20 +46,27 @@ Each H100 has 80 GB, the same as the paper's A100s, so the paper's batch size of
 
 | Partition | Time limit | Use |
 |---|---|---|
-| `general` (default) | 2 days | real runs |
-| `interactive` | 4 hours | tests and debugging |
-| `debug` | 1 hour | quick checks |
-| `scavenger` | 2 days | lower priority, can be preempted |
+| `general` (default) | 2 days | **CPU only**: nodes easley001-048 have no GPUs |
+| `h100` | 2 days | 4 nodes (easley051-054), 2x H100 each = **8 H100** |
+| `l40s` | 2 days | 3 nodes (easley055-057), 4x L40S each = **12 L40S** |
+| `interactive` | 4 hours | CPU nodes plus the H100 and the 3 L40S nodes; tests and debugging |
+| `debug` | 1 hour | same nodes; quick checks |
+| `scavenger` | 2 days | preemptible; also includes L40S nodes easley058-063, so all 9 L40S nodes (36 cards) are reachable only here |
 
-All are backed by the same `easley[...]` nodes (**confirmed**).
+(`sinfo -o "%P %a %l %D %G %N"`, **confirmed**.) Two consequences: **GPU jobs go to
+`h100`, `l40s` or `interactive`, never `general`**, and only 12 L40S plus 8 H100
+sit in non-preemptible partitions. An H100 node holds only 2 GPUs, so a 4-GPU H100
+run needs 2 nodes; an L40S node holds 4.
 `scontrol show partition general` shows: `MaxNodes=UNLIMITED`, `MaxTime=2-00:00:00`,
 default QOS `easley-general`, allowed QOS `easley-general, extended, easley`.
+The QOS and limits of the `h100` and `l40s` partitions have **not** been checked:
+`scontrol show partition h100` and `scontrol show partition l40s`.
 
 ## 3. QOS limits (`sacctmgr show qos ... format=...`)
 
 | QOS | Per-user limits | Consequence |
 |---|---|---|
-| `easley-general` | `cpu=512`, `mem=2,059,472M` (~2 TB); no GPU or node cap listed | No explicit GPU limit. At 8 CPUs per GPU task, 512 CPUs allows ~64 GPU tasks (**computed**), more than the 36 L40S that exist, so GPU availability and queue priority are the real limit. Multi-node jobs are allowed. |
+| `easley-general` | `cpu=512`, `mem=2,059,472M` (~2 TB); no GPU or node cap listed | Applies to the CPU-only `general` partition, so it says **nothing** about GPU limits. The GPU partitions' QOS is unverified. |
 | `easley` | 512 submitted jobs | Large job arrays are fine. |
 | `extended` | `cpu=1`, 1 job, 5-day walltime | One CPU: not usable for GPU training. |
 | `interactive` | 1 node per user (`QOSMaxNodePerUserLimit` shown by `squeue`) | A job array on `interactive` runs one task at a time, whatever `%N` says. |
@@ -100,13 +107,81 @@ runs.
 | Resume | Continued from the saved step; loss stayed in range | confirmed |
 | 400,000 steps at batch 8 | ~56 h at 0.507 s/step | computed, assumes speed holds |
 | 800,000 steps at batch 8 (matches the paper's total images seen) | ~113 h | computed |
-| Batch-size limit test (4, 8, 10, 12, 14) | **empty** (`slurm/bs_limit_test.sh` written; results pending) | |
+| Batch-size limit test (4, 8, 10, 12, 14) | Limit is batch 14 in fp32; ~15.6 images/s at every size (table below) | confirmed |
 
 Loss behavior (interpretation, consistent with the logged values): the raw loss
 is a sum over pixels, and a batch containing an image at time step 0 adds about
 65,536 / batch_size to the mean, because the network cannot predict 1% noise.
 This produces clusters near 8k, 16k and 24k at batch 8. Log per-time-step or
 smoothed loss for graphs.
+
+### Batch-size limit test (L40S, fp32, `slurm/bs_limit_test.sh`, 2026-11)
+
+Training `batch_size` set per task, 4-minute runs, memory from `nvidia-smi`
+sampled every 2 s (this is memory held by the process including PyTorch's cache,
+so it slightly overstates what is strictly needed).
+
+| Batch | s/step | images/s | Peak GPU memory (MiB) |
+|---:|---:|---:|---:|
+| 4 | 0.260 | 15.4 | 15,425 |
+| 8 | 0.509 | 15.7 | 28,131 |
+| 10 | 0.641 | 15.6 | 34,489 |
+| 12 | 0.766 | 15.7 | 40,819 |
+| 14 | 0.894 | 15.7 | 43,225 |
+| 16 | out of memory at step 2 (earlier run) | | |
+
+Findings:
+- **Limit on one L40S in fp32: batch 14.** The paper's batch of 16 does not fit.
+- **Throughput is flat at ~15.6 images/s at every batch size.** The GPU is already
+  compute-saturated at batch 4, so a larger batch buys no speed. Speedups must
+  come from compute efficiency (bf16, `channels_last`, `torch.compile`) or from
+  more GPUs.
+- **Step time is linear in batch size**, about 0.063 s per image with almost no
+  fixed overhead (**computed** from the table).
+- **Memory is linear too:** about 3.2 GB per image plus about 2.7 GB fixed
+  (**computed**, from batches 4 to 12; the 14 point is capped by the card). The
+  fixed part is consistent with weights + gradients + Adam + EMA at ~20 bytes per
+  parameter for roughly 100M parameters (**interpretation**; Phase 0's parameter
+  count will confirm).
+- **Extrapolation (computed, untested):** batch 16 needs about 53 GB, which
+  explains the out-of-memory error. On an 80 GB H100 the same arithmetic puts the
+  fp32 ceiling near batch 23 to 24, so batch 16 should fit. (The H100 memory readings turned out unreliable; see the H100 section below.)
+- **Cost estimate (computed):** the paper's 400,000 steps at batch 16 take about
+  112 hours on one L40S (400,000 x 16 x 0.063 s).
+
+### Batch-size test on H100 (easley053, default PyTorch settings)
+
+Provenance: run with the original script, before the GPU-tagged version was copied
+to the cluster. It used the fixed sizes 4, 8, 10, 12 and 14, wrote untagged
+`bs_result_<N>.txt`, and **overwrote the L40S result files** (the L40S table above
+is the saved original). Batch 10 came from array job 1398670 (task 2), the rest
+from array job 1398689. Two tasks shared the node's 2 H100s at a time.
+
+| Batch | s/step | images/s | Peak (MiB, nvidia-smi) | Throughput vs L40S |
+|---:|---:|---:|---:|---:|
+| 4 | 0.105 | 38.1 | 15,933 | 2.5x |
+| 8 | 0.182 | 44.0 | 46,493 | 2.8x |
+| 10 | 0.223 | 44.8 | 49,657 | 2.9x |
+| 12 | 0.261 | 46.0 | 41,629 | 2.9x |
+| 14 | 0.303 | 46.2 | 46,709 | 2.9x |
+
+Findings:
+- **The H100 trains about 2.5x to 2.9x faster than the L40S** at the same batch size
+  (images/s ratio, **computed**).
+- **Throughput rises with batch size** (38 to 46 images/s from batch 4 to 12) and then
+  flattens, unlike the L40S, which was flat from batch 4. The H100 is not saturated at
+  small batches.
+- **The `nvidia-smi` memory readings are not reliable on the H100.** Batch 8 reads
+  46.5 GB (L40S: 28.1 GB), and batch 12 reads less than batch 8. A likely cause
+  (**interpretation, unverified**) is PyTorch's caching allocator plus
+  `cudnn.benchmark = True` in `fast_ddpm_main.py`, which can reserve large workspaces
+  when memory is available. Real memory need requires
+  `torch.cuda.max_memory_allocated()` (Phase 0).
+- **The H100's batch ceiling is unmeasured.** Nothing above 14 was tested, so the
+  earlier estimate of about batch 23 to 24 is now doubtful.
+- **Cost estimate (computed):** if batch 16 fits and throughput stays near 46 images/s,
+  400,000 steps at batch 16 (6.4M images) take about 39 hours on one H100, against
+  about 112 hours on one L40S.
 
 ## 6. Hopper
 
@@ -142,6 +217,6 @@ If it does, Hopper's A100s (80 GB) would fit the paper's batch size of 16.
 
 - Do I have access to Hopper, and how do I log in?
 - Per-user GPU limits and any GPU-hour allocation for my account?
-- Can I run multi-node GPU jobs on `easley-general`?
+- What are the per-user limits on the `h100` and `l40s` partitions, and can I run multi-node jobs there?
 - Scratch purge policy and per-user quota?
 - Gres name for the H100 cards?

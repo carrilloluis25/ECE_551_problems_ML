@@ -8,7 +8,7 @@ use the full tutorial for the reasons behind each step and the troubleshooting l
 ## 0. What you need
 - Easley login (UNM Alliance HPC), a GitHub account, an SSH key added to GitHub.
 - GPU used: L40S (`--gres=gpu:l40s:1`). Partition for tests: `interactive` (4 hr cap).
-  Partition for long runs: `general` (2 days).
+  Partitions for long runs: `l40s` or `h100` (2 days). `general` has no GPUs.
 
 ## 1. Get the code (once)
 ```bash
@@ -117,7 +117,7 @@ Package installs do not need a GPU: do them on the login node.
 | `ModuleNotFoundError: yaml/pandas/lmdb/...` | Missing dependency; rerun the step 2 pip lines |
 | NumPy "compiled using NumPy 1.x" warning | `pip install "numpy<2"` |
 | `CUDA out of memory` | Lower `batch_size` in the config |
-| Job killed at `TIME LIMIT` | Raise `--time`, or use `general` for runs over 4 hr |
+| Job killed at `TIME LIMIT` | Raise `--time`, or use the `l40s` / `h100` partition for runs over 4 hr |
 | Job fails instantly, `.out` empty | Read the `.err` file; Python errors land there |
 
 ## 9. Rules of thumb

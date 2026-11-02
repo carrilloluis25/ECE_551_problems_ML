@@ -165,10 +165,11 @@ above the output.
 
 ## 5. SLURM basics for this cluster
 
-Confirmed partitions (`sinfo`): `general` (2-day limit, for real training
-runs), `interactive` (4hr limit, for debugging/smoke tests), `debug` (1hr),
-`scavenger` (2-day, lower priority/preemptible). All backed by the same
-`easley[...]` node pool.
+Confirmed partitions (`sinfo`): `h100` (2-day limit, 4 nodes x 2 H100) and `l40s`
+(2-day limit, 3 nodes x 4 L40S) for real GPU training runs; `interactive` (4hr
+limit, 1 node per user) for debugging/smoke tests; `debug` (1hr); `scavenger`
+(2-day, preemptible). **`general` has no GPUs** (CPU only), so do not use it for
+GPU jobs. See [easley_cluster_notes.md](easley_cluster_notes.md).
 
 **Note:** `<gpu_partition>` and similar `<...>` markers in this doc are
 placeholders to replace, not literal text — bash will try to interpret
@@ -191,7 +192,7 @@ placeholders — dataset/config/exp path are yours to choose):
 ```bash
 #!/bin/bash
 #SBATCH --job-name=fastddpm-smoke
-#SBATCH --partition=general
+#SBATCH --partition=l40s
 #SBATCH --gres=gpu:l40s:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G

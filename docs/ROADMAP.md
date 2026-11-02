@@ -88,7 +88,7 @@ only Phase 3, so the 3D work can start before the scaling study finishes.
 
 | Phase | What | Gate | Status |
 |---|---|---|---|
-| 0 | **Baseline and profiling.** Inference baseline; short training runs at several batch sizes (seconds/step, images/s, `max_memory_allocated`); parameter count; `torch.profiler` split of data loading, forward, backward, optimizer, EMA; GPU utilization; L40S cards per node and partition limits. Changes no code. | Baseline table (time, throughput, memory, utilization) plus a profile showing where the time goes | 🔶 Partial. Known: inference ~3.6 s per batch of 16 (~16 min for 3,501 images); training ~0.51 s/step at batch 8; batch 16 runs out of memory in fp32; one node had 4 L40S. Batch-limit job array written (`slurm/bs_limit_test.sh`). Empty: profiler, utilization, parameter count |
+| 0 | **Baseline and profiling.** Inference baseline; short training runs at several batch sizes (seconds/step, images/s, `max_memory_allocated`); parameter count; `torch.profiler` split of data loading, forward, backward, optimizer, EMA; GPU utilization; L40S cards per node and partition limits. Changes no code. | Baseline table (time, throughput, memory, utilization) plus a profile showing where the time goes | 🔶 Partial. Known: inference ~3.6 s per batch of 16 (~16 min for 3,501 images); training ~0.51 s/step at batch 8; batch 16 runs out of memory in fp32; one node had 4 L40S. L40S batch-limit test done: ceiling is batch 14 (fp32), ~15.6 images/s flat from batch 4 to 14 (compute-bound), ~3.2 GB per image + ~2.7 GB fixed. H100 (batch 4 to 14): ~2.5x to 2.9x the L40S throughput, ~44 to 46 images/s; its batch ceiling and true memory use are unmeasured. Empty: profiler, utilization, parameter count |
 | 1 | **Sharded inference.** Add `--shard` / `--num_shards` (keep indices where `index % num_shards == shard`); per-image PSNR/SSIM to a CSV per shard; Slurm job array, one L40S each; merge from all 3,501 rows, not from per-shard averages; repeat at `--timesteps` 5 and 2 | Merged PSNR/SSIM equal to the single-GPU run (37.46 / 0.9155), wall-clock near 1/N | Empty |
 | 2 | **Single-GPU efficiency.** bf16 autocast, `channels_last`, `torch.compile`, data-loader tuning (`pin_memory`, `persistent_workers`, `prefetch_factor`, pre-converted data), then re-measure the largest batch that fits | Steps/s table for each optimization added one at a time, with no quality loss | Empty |
 | 3 | **DDP training on one node.** Replace `DataParallel` in `sg_train` with `DistributedDataParallel` via `torchrun`; `DistributedSampler` with `set_epoch`; per-rank seeds; rank-0-only checkpointing, logging and folder deletion; keep strict checkpoint loading; decide batch semantics (16 global vs 16 per GPU) after settling the learning rate | Matching loss curves at 1, 2 and 4 GPUs (same global batch) and a measured speedup over the Phase 2 single-GPU run | Empty |
@@ -128,6 +128,10 @@ original roadmap document.
   The model has roughly 100M parameters (inferred from checkpoint size), so each
   all-reduce moves about 400 MB. Communication should be small next to a
   ~0.5 s step but becomes visible as steps get faster after Phase 2.
+- **GPU topology (confirmed by `sinfo`).** An H100 node has only 2 GPUs, so
+  single-node DDP on H100 tops out at 2 GPUs and a 4-GPU H100 run needs 2 nodes.
+  An L40S node has 4 GPUs, so single-node DDP can use 4 L40S. Phase 3 on H100 is
+  therefore 2-GPU; Phase 4 starts at 4 GPUs there.
 - **3D data (Phase 6).** The processed LDFDCT folders are named like
   `C227_216_fd.png` (case, slice). Consecutive slices per patient could be
   stacked into pseudo-volumes without new downloads. Not yet checked: whether
@@ -136,8 +140,10 @@ original roadmap document.
 ### Open questions and risks
 - **Learning rate:** paper 2e-4 vs config 2e-5. Blocks any from-scratch
   comparison; settle it early.
-- **Easley capacity:** L40S cards per node, inter-node network, and how many
-  GPUs one user can hold at once. These decide how far Phase 4 can go.
+- **Easley capacity:** non-preemptible GPUs are 12 L40S (3 nodes x 4) and 8 H100
+  (4 nodes x 2); all 36 L40S are reachable only through preemptible `scavenger`.
+  Still unknown: how many GPUs one user can hold at once and whether multi-node
+  jobs are allowed on the GPU partitions. These decide how far Phase 4 can go.
 - **Queue time:** multi-GPU and multi-node jobs may wait much longer than
   single-GPU ones. Keep smoke tests on `interactive` and budget queue time.
 - **Batch size vs quality:** a larger global batch speeds training but can change
@@ -192,9 +198,10 @@ Themes the project should cover to round it out. Status: done / partial / empty
       Plan: array-job sweeps over `--timesteps`, `--scheduler_type`, batch size,
       learning rate, model width.
 - [ ] **Find the limits** — partial. Found: L40S OOMs at `sampling_fid.batch_size: 128`,
-      works at 16; training batch 16 runs out of memory, batch 8 works. Batch-limit
-      job array written (`slurm/bs_limit_test.sh`, sizes 4, 8, 10, 12, 14). Empty:
-      its results, max image size, H100 behavior (Phase 0 and Phase 6).
+      works at 16; training batch 16 runs out of memory, batch 8 works. L40S batch-limit
+      test done (`slurm/bs_limit_test.sh`): ceiling is batch 14 in fp32, throughput
+      ~15.6 images/s at every size. Empty: H100 ceiling, max image size, 3D limits
+      (Phase 0 and Phase 6).
 - [ ] **Demonstrate setup for experiment** — partial (tutorial, SLURM scripts, env recipe).
 
 ### Training and models
@@ -238,10 +245,10 @@ Themes the project should cover to round it out. Status: done / partial / empty
 - [ ] Which of the three Fast-DDPM tasks to reproduce first (super-resolution
       / denoising / translation) — pick based on which public dataset is
       fastest to obtain access to.
-- [x] ~~SLURM partition/QOS names~~ — confirmed: `general` (2-day, real runs),
-      `interactive` (4hr, debugging), `debug` (1hr), `scavenger` (2-day,
-      preemptible). GPU gres: `gpu:l40s` confirmed, `gpu:h100` assumed but
-      not yet verified.
+- [x] ~~SLURM partition/QOS names~~ — confirmed: `h100` (4 nodes x 2 H100) and
+      `l40s` (3 nodes x 4 L40S), both 2-day; `interactive` (4hr); `debug` (1hr);
+      `scavenger` (2-day, preemptible). `general` is CPU-only. Gres names
+      `gpu:l40s:4` and `gpu:h100:2` per node confirmed by `sinfo`.
 - [ ] H100 access was granted (2026-11-02, user-reported). Fill in: partition
       name, gres name, per-user limits, GPUs per node, PCIe vs SXM (NVLink). The
       L40S vs H100 comparison is now runnable; the batch-limit script takes a
@@ -250,11 +257,11 @@ Themes the project should cover to round it out. Status: done / partial / empty
       GDM-VE comparison) — revisit once Phase 4 results are in.
 - [ ] Learning rate: 2e-4 (paper) or 2e-5 (config)? Needed before Phase 3's
       batch-semantics decision and Phase 5's from-scratch run.
-- [ ] GPU allocation. Partly answered (see `easley_cluster_notes.md`): the
-      `easley-general` QOS has no explicit GPU or node cap, only 512 CPUs per user,
-      so GPU availability and queue priority are the real limits; `interactive`
-      allows 1 node per user. Still empty: any GPU-hour allocation, fair-share
-      behavior, and whether multi-node GPU jobs are allowed. Ask the staff.
+- [ ] GPU allocation. Known: `interactive` allows 1 node per user; the
+      `easley-general` QOS (512 CPUs per user) applies only to the CPU-only
+      `general` partition. Empty: the QOS and limits of the `h100` and `l40s`
+      partitions (`scontrol show partition h100`), any GPU-hour allocation, and
+      whether multi-node GPU jobs are allowed. Ask the staff.
 - [ ] Hopper access. The account lists `hopper-condo`, `hopper-debug` and
       `hopper-genera+` QOS entries, so it may be associated with Hopper (80 GB
       A100s, matching the paper). Unverified: test with `sacctmgr show cluster` and

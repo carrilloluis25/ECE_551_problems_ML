@@ -38,7 +38,7 @@ experiments can be replicated by others on the same cluster.
 | H100 usage | **empty** |
 | Hopper (A100) | No login found yet; the account lists Hopper QOS names, so access is **unverified** |
 | Python / PyTorch | 3.10.6 / 2.2.2 (cu121), conda env `fastddpm` |
-| Scheduler | SLURM (`interactive`, `general`, `debug`, `scavenger` partitions). `interactive` allows 1 node per user; `easley-general` caps users at 512 CPUs with no explicit GPU cap |
+| Scheduler | SLURM. GPU partitions: `h100` (4 nodes x 2 H100) and `l40s` (3 nodes x 4 L40S); `interactive` (4 h, 1 node per user), `debug`, `scavenger`. `general` is CPU-only |
 | Scratch | `~/carc-scratch` (data and checkpoints live here, not in the repo) |
 
 The paper pins PyTorch 1.12.1 on A100s. That version has no kernels for L40S or
@@ -55,7 +55,7 @@ numbers are in [docs/easley_cluster_notes.md](docs/easley_cluster_notes.md).
 | Inference reproduction (LDFDCT, pretrained checkpoint, full test set) | Done |
 | Training smoke test (loop runs, checkpoints save) | Done: batch 8 at ~0.51 s/step; batch 16 runs out of memory on the L40S |
 | Resume-from-checkpoint test | Done: continued from the saved step, loss in range |
-| Batch-size limit test (4, 8, 10, 12, 14) | Script written; results **empty** |
+| Batch-size limit test (L40S) | Done: limit is batch 14 in fp32; ~15.6 images/s at every batch size. H100 trains ~2.5x to 2.9x faster (44 to 46 images/s); H100 batch ceiling: **empty** |
 | HPC roadmap phases 0-6 | Phase 0 partial; Phases 1-6 **empty** |
 | Full training reproduction | **empty** |
 | Extension (new dataset / hardware comparison / GDM-VE) | **empty** |

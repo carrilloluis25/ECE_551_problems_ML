@@ -527,7 +527,7 @@ python fast_ddpm_main.py \\
 ''', None, 755)}</div>
 <div>{legend([
  "Name shown in <code>squeue</code>.",
- "Queue: <code>interactive</code> (4 h cap) for tests; <code>general</code> (2 days) for long runs.",
+ "Queue: <code>interactive</code> (4 h cap) for tests; <code>l40s</code> or <code>h100</code> (2 days) for long runs. <code>general</code> has no GPUs.",
  "One L40S GPU.",
  "CPU cores for data loading (matches <code>num_workers: 8</code>).",
  "Walltime limit: the scheduler kills the job at this time.",

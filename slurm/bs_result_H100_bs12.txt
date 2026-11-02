@@ -1,0 +1,1 @@
+gpu=H100 batch=12 status=OK steps_logged=721 median_s_per_step=0.261 images_per_s=46.0 peak_gpu_mem_MiB=41629

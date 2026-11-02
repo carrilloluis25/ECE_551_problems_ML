@@ -1,0 +1,1 @@
+gpu=L40S batch=4 status=OK steps_logged=469 median_s_per_step=0.260 images_per_s=15.4 peak_gpu_mem_MiB=15425
