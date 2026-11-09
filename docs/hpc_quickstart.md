@@ -2,6 +2,7 @@
 
 One-page version of [hpc_tutorial.md](hpc_tutorial.md). Use this to get running;
 use the full tutorial for the reasons behind each step and the troubleshooting log.
+New to SLURM? Start with [slurm_first_script.md](slurm_first_script.md) (the simplest job, for an L40S or an H100).
 To pick a partition, GPU and job shape for a task, and to see the limits that apply,
 use [run_options_and_bounds.md](run_options_and_bounds.md).
 

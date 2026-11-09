@@ -89,6 +89,7 @@ ECE_551_problems_ML/
 │   ├── hpc_tutorial.md         # full cluster setup, workflow, troubleshooting log
 │   ├── hpc_quickstart.md       # one-page version of the tutorial
 │   ├── easley_cluster_notes.md # partitions, QOS limits, storage, measured numbers
+│   ├── slurm_first_script.md   # your first SLURM script, for an L40S or an H100
 │   ├── run_options_and_bounds.md # how to run each kind of task, limits, results so far, baseline plan
 │   ├── images/                 # expected-output screenshots and result figures used in the docs
 │   ├── images_src/build_images.py # regenerates them (stdlib + headless Chrome) from real output text and docs/results/
@@ -103,6 +104,7 @@ ECE_551_problems_ML/
 │   ├── bs_limit_test.sh            # batch-size limit job array
 │   ├── lr_test.sh                  # learning-rate test (2-task array)
 │   ├── eval_checkpoints.sh         # PSNR/SSIM of training checkpoints
+│   ├── hello_gpu.sh / hello_torch.sh # the simplest GPU jobs (see docs/slurm_first_script.md)
 │   ├── authors_loss_probe.sh       # training loss of the authors' checkpoint
 │   ├── baseline_train.sh           # one 125,000-step chunk of the baseline
 │   └── submit_baseline.sh          # queues the chunks and evaluations

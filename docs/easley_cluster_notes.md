@@ -41,7 +41,8 @@ Then, inside an allocation on the H100 partition: `nvidia-smi`,
 `nvidia-smi topo -m`, and
 `python -c "import torch; print(torch.cuda.get_device_name(0), torch.cuda.get_device_capability(0))"`
 (expect capability (9, 0); PyTorch 2.2.2 + cu121 should support it).
-Memory per H100 is **at least ~92 GiB**, not 80 GB: a training run read 94,133 MiB in use
+Memory per H100 is **95,830 MiB total (93.1 GiB usable to PyTorch)**, not 80 GB (`nvidia-smi` and
+`torch.cuda.get_device_properties` in `hello_gpu.sh` / `hello_torch.sh`, 2026-11-09). A training run read 94,133 MiB in use
 (see the batch-size test). The paper's batch size of 16 fits (confirmed).
 
 ## 2. Partitions (`sinfo`)
@@ -186,11 +187,10 @@ result files (the L40S table above is the saved original; files were later renam
 Findings:
 - **No out-of-memory up to batch 32.** The H100's ceiling is above 32 and still
   unmeasured. The paper's batch of 16 fits with room to spare (about 53 GB).
-- **The cards have more than 80 GB.** `nvidia-smi` reported 94,133 MiB in use at batch 32,
-  so memory.total is at least ~92 GiB. This is consistent with an H100 NVL (94 GB)
-  (**unverified**; confirm with
-  `nvidia-smi --query-gpu=name,memory.total --format=csv`, which the new script also prints
-  at the top of each task's `.out`). An earlier note here assuming 80 GB was wrong.
+- **The cards have more than 80 GB.** `nvidia-smi` reported 94,133 MiB in use at batch 32.
+  **Confirmed 2026-11-09:** the cards are **H100 NVL** with 95,830 MiB total (93.1 GiB usable
+  to PyTorch), measured by `slurm/hello_gpu.sh` and `slurm/hello_torch.sh`. An earlier note
+  here assuming 80 GB was wrong.
 - **The H100 trains about 2.5x to 2.9x faster than the L40S** at the same batch size
   (images/s, **computed**).
 - **Throughput saturates around batch 12 to 16** at about 47 images/s. Going from batch 16 to

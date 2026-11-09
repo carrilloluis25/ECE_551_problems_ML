@@ -186,6 +186,77 @@ TERMINALS = {
             5: "The last job scores the final checkpoint on the full 3,501-image test set. The '...' line is elided here.",
         },
     },
+    "term_hello_gpu": {
+        "caption": "hello_gpu.sh on an L40S and on an H100 (real output, jobs 1411568 and 1411569, 2026-11-09)",
+        "blocks": [
+            ("sbatch hello_gpu.sh   -> hello-gpu-1411568.out   (L40S)", [
+                ("$ cat hello-gpu-1411568.out", None),
+                ("job id:   1411568", None),
+                ("node:     easley055", 1),
+                ("gpus:     0", 2),
+                ("GPU 0: NVIDIA L40S (UUID: GPU-aa26745e-2c41-9daa-4674-51f7b874c88b)", 3),
+                ("NVIDIA L40S, 46068 MiB, 570.211.01", 3),
+                ("OK", 4),
+            ]),
+            ("sbatch --partition=h100 --gres=gpu:h100:1 hello_gpu.sh   -> hello-gpu-1411569.out   (H100)", [
+                ("$ cat hello-gpu-1411569.out", None),
+                ("job id:   1411569", None),
+                ("node:     easley053", 1),
+                ("gpus:     0", 2),
+                ("GPU 0: NVIDIA H100 NVL (UUID: GPU-9417af8f-8bf1-ba51-dce7-6e72db989fae)", 3),
+                ("NVIDIA H100 NVL, 95830 MiB, 570.211.01", 3),
+                ("OK", 4),
+            ]),
+        ],
+        "legend": {
+            1: "The compute node the job ran on (easley055 is an L40S node, easley053 an H100 node), not the login node.",
+            2: "gpus: 0 is the card's index inside the job. A job sees only the GPUs it asked for, so this is 0 on both.",
+            3: "The GPU the partition and --gres line gave you: its name, total memory (46,068 vs 95,830 MiB) and the driver version.",
+            4: "The script reached its last line. Together with COMPLETED 0:0 in sacct, that is a pass.",
+        },
+    },
+    "term_hello_torch": {
+        "caption": "hello_torch.sh on an L40S and on an H100 (real output, jobs 1411570 and 1411571, 2026-11-09)",
+        "blocks": [
+            ("sbatch hello_torch.sh   -> hello-torch-1411570.out   (L40S)", [
+                ("$ cat hello-torch-1411570.out", None),
+                ("node: easley055   gpus: 0", None),
+                ("torch 2.2.2+cu121 | cuda available: True", 1),
+                ("NVIDIA L40S | capability (8, 9) | 44.4 GiB", 2),
+                ("matmul ok: True", 3),
+                ("OK", None),
+            ]),
+            ("sbatch --partition=h100 --gres=gpu:h100:1 hello_torch.sh   -> hello-torch-1411571.out   (H100)", [
+                ("$ cat hello-torch-1411571.out", None),
+                ("node: easley053   gpus: 0", None),
+                ("torch 2.2.2+cu121 | cuda available: True", 1),
+                ("NVIDIA H100 NVL | capability (9, 0) | 93.1 GiB", 2),
+                ("matmul ok: True", 3),
+                ("OK", None),
+            ]),
+        ],
+        "legend": {
+            1: "The conda env loaded (PyTorch 2.2.2 built for CUDA 12.1) and PyTorch can see the GPU.",
+            2: "Compute capability (8, 9) for the L40S and (9, 0) for the H100, and the memory PyTorch can use: 44.4 vs 93.1 GiB.",
+            3: "A real computation ran on the GPU, so 'available' means 'works'.",
+        },
+    },
+    "term_hello_sacct": {
+        "caption": "Confirming the four hello jobs (real output, 2026-11-09)",
+        "blocks": [
+            ("sacct", [
+                ("$ sacct -u $USER -S today -X --format=JobID,JobName%14,Partition,State,ExitCode,Elapsed,NodeList | grep hello", None),
+                ("1411568           hello-gpu       l40s  COMPLETED      0:0   00:00:00       easley055", 1),
+                ("1411569           hello-gpu       h100  COMPLETED      0:0   00:00:00       easley053", 1),
+                ("1411570         hello-torch       l40s  COMPLETED      0:0   00:00:11       easley055", 2),
+                ("1411571         hello-torch       h100  COMPLETED      0:0   00:00:04       easley053", 2),
+            ]),
+        ],
+        "legend": {
+            1: "The one-line GPU report finishes in under a second once it has a card. All four ended COMPLETED with exit code 0:0.",
+            2: "Importing PyTorch takes most of the time: 11 s on the first run (L40S), 4 s on the second.",
+        },
+    },
 }
 
 

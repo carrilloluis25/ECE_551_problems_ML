@@ -28,6 +28,8 @@ Recorded 2026-11-03. Statuses: **confirmed** (seen in a log or command output),
 | Train across nodes | `--nodes=2` + `srun torchrun` | multi-node permission **unverified** | Phase 4: **not built yet** |
 | View images | Colab, or the notebook on Easley JupyterHub | | `notebooks/fast_ddpm_viewer.ipynb` |
 
+Never submitted a job? Start with [slurm_first_script.md](slurm_first_script.md).
+
 How the job shapes differ (single job, array, dependency chain, multi-GPU): see
 [hpc_tutorial.md section 5a](hpc_tutorial.md).
 
@@ -75,7 +77,7 @@ Practical consequences:
 | GPU | Memory | Fp32 batch ceiling | Status |
 |---|---|---|---|
 | L40S | 44.4 GiB usable | **14** (16 runs out of memory at step 2) | confirmed |
-| H100 NVL (reported by `nvidia-smi` in the probe job) | at least ~92 GiB | above 32 (not found yet); batch 16 uses about 53 GB | confirmed |
+| H100 NVL | 95,830 MiB total, **93.1 GiB usable to PyTorch** (measured by `hello_torch.sh`) | above 32 (not found yet); batch 16 uses about 53 GB | confirmed |
 
 Memory per image is about 3.1 to 3.2 GB plus about 2.7 GB fixed (**computed**).
 Inference batch: 16 on L40S (128 runs out of memory).

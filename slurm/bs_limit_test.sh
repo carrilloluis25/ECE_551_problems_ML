@@ -10,8 +10,9 @@
 #SBATCH --error=fastddpm-bs-limit-%A_%a.err
 
 # Defaults test the L40S. For another GPU, override on the command line, e.g.:
-#   sbatch --partition=<name> --gres=gpu:h100:1 --array=0-4 \
-#          --export=ALL,BS_SIZES="8 16 20 24 32" bs_limit_test.sh
+#   BS_SIZES="8 16 20 24 32" sbatch --partition=h100 --gres=gpu:h100:1 --array=0-4 bs_limit_test.sh
+# BS_SIZES is set in the shell, not with --export=ALL,BS_SIZES=...: that form got jobs held on the
+# h100 partition ("user env retrieval failed"); see the tutorial's troubleshooting log.
 read -ra SIZES <<< "${BS_SIZES:-4 8 10 12 14}"
 B=${SIZES[$SLURM_ARRAY_TASK_ID]}
 OUT=$SLURM_SUBMIT_DIR
