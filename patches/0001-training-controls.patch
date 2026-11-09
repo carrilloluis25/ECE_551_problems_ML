@@ -1,0 +1,80 @@
+diff --git a/fast_ddpm_main.py b/fast_ddpm_main.py
+index ab74d84..97e8352 100755
+--- a/fast_ddpm_main.py
++++ b/fast_ddpm_main.py
+@@ -89,6 +89,17 @@ def parse_args_and_config():
+         help="eta used to control the variances of sigma",
+     )
+     parser.add_argument("--sequence", action="store_true")
++    parser.add_argument(
++        "--max_steps",
++        type=int,
++        default=0,
++        help="Stop training after this many steps and save a final checkpoint (0 = no limit)",
++    )
++    parser.add_argument(
++        "--no_first_ckpt",
++        action="store_true",
++        help="Do not save a checkpoint at step 1",
++    )
+ 
+     args = parser.parse_args()
+     args.log_path = os.path.join(args.exp, "logs", args.doc)
+diff --git a/runners/diffusion.py b/runners/diffusion.py
+index a20aff5..37419b6 100755
+--- a/runners/diffusion.py
++++ b/runners/diffusion.py
+@@ -81,6 +81,24 @@ def get_beta_schedule(beta_schedule, *, beta_start, beta_end, num_diffusion_time
+     return betas
+ 
+ 
++def save_checkpoint(states, log_path, step):
++    """Write ckpt_<step>.pth atomically, then point ckpt.pth at it (also atomically).
++
++    A kill during the write leaves a stray .tmp file instead of a truncated checkpoint,
++    and ckpt.pth always names the newest complete checkpoint.
++    """
++    numbered = os.path.join(log_path, "ckpt_{}.pth".format(step))
++    tmp = numbered + ".tmp"
++    torch.save(states, tmp)
++    os.replace(tmp, numbered)
++    latest = os.path.join(log_path, "ckpt.pth")
++    link = latest + ".lnk"
++    if os.path.lexists(link):
++        os.remove(link)
++    os.symlink(os.path.basename(numbered), link)
++    os.replace(link, latest)
++
++
+ class Diffusion(object):
+     def __init__(self, args, config, device=None):
+         self.args = args
+@@ -221,7 +239,10 @@ class Diffusion(object):
+                 if self.config.model.ema:
+                     ema_helper.update(model)
+ 
+-                if step % self.config.training.snapshot_freq == 0 or step == 1:
++                max_steps = getattr(self.args, "max_steps", 0)
++                at_end = bool(max_steps) and step >= max_steps
++                first = step == 1 and not getattr(self.args, "no_first_ckpt", False)
++                if step % self.config.training.snapshot_freq == 0 or first or at_end:
+                     states = [
+                         model.state_dict(),
+                         optimizer.state_dict(),
+@@ -231,11 +252,11 @@ class Diffusion(object):
+                     if self.config.model.ema:
+                         states.append(ema_helper.state_dict())
+ 
+-                    torch.save(
+-                        states,
+-                        os.path.join(self.args.log_path, "ckpt_{}.pth".format(step)),
+-                    )
+-                    torch.save(states, os.path.join(self.args.log_path, "ckpt.pth"))
++                    save_checkpoint(states, self.args.log_path, step)
++
++                if at_end:
++                    logging.info("Reached max_steps={}; stopping.".format(max_steps))
++                    return
+                     
+ 
+     # Training Fast-DDPM for tasks that have two conditions: multi image super-resolution.

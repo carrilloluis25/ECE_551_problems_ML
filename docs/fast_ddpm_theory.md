@@ -378,7 +378,9 @@ schedulers as future work. [paper]
 3. **`n_iters` is unused.** `training.n_iters: 5000000` in the config is never
    checked in the training loop I read; the loop runs until `n_epochs`. The paper's
    400,000-iteration figure is not enforced by the code, so a full reproduction
-   needs a manual stop.
+   needs a manual stop. [measured, 2026-11-03] The released LDFDCT checkpoint was
+   saved at step 500,000 (epoch 605), with Adam lr 2e-5 (not the paper's 2e-4) and
+   an inferred batch of 16 (13,211 pairs / 826 steps per epoch).
 4. **Validation loop.** `validation_freq` is set to an effectively infinite value
    and I found no validation code in `sg_train`, so only training loss is logged.
 5. **`DataParallel`.** Training wraps the model in `torch.nn.DataParallel`, not

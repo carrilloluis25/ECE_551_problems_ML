@@ -34,8 +34,8 @@ experiments can be replicated by others on the same cluster.
 | Item | Value |
 |---|---|
 | Cluster | Easley (UNM Alliance HPC) |
-| GPUs used so far | NVIDIA L40S (46 GB) |
-| H100 usage | **empty** |
+| GPUs used so far | NVIDIA L40S (46 GB) and H100 NVL (about 94 GB) |
+| H100 usage | Batch-size test, learning-rate test, loss probe; the baseline run is in progress |
 | Hopper (A100) | No login found yet; the account lists Hopper QOS names, so access is **unverified** |
 | Python / PyTorch | 3.10.6 / 2.2.2 (cu121), conda env `fastddpm` |
 | Scheduler | SLURM. GPU partitions: `h100` (4 nodes x 2 H100) and `l40s` (3 nodes x 4 L40S); `interactive` (4 h, 1 node per user), `debug`, `scavenger`. `general` is CPU-only |
@@ -44,7 +44,9 @@ experiments can be replicated by others on the same cluster.
 The paper pins PyTorch 1.12.1 on A100s. That version has no kernels for L40S or
 H100, so this project uses PyTorch 2.2.2. Details and the dependency fixes this
 required are in the tutorial. Scheduler limits, storage layout and measured
-numbers are in [docs/easley_cluster_notes.md](docs/easley_cluster_notes.md).
+numbers are in [docs/easley_cluster_notes.md](docs/easley_cluster_notes.md). To
+choose how to run a given task and see what limits apply, start from
+[docs/run_options_and_bounds.md](docs/run_options_and_bounds.md).
 
 ## Status
 
@@ -56,8 +58,10 @@ numbers are in [docs/easley_cluster_notes.md](docs/easley_cluster_notes.md).
 | Training smoke test (loop runs, checkpoints save) | Done: batch 8 at ~0.51 s/step; batch 16 runs out of memory on the L40S |
 | Resume-from-checkpoint test | Done: continued from the saved step, loss in range |
 | Batch-size limit test (L40S) | Done: limit is batch 14 in fp32; ~15.6 images/s at every batch size. H100 trains ~2.5x to 2.9x faster (~47 images/s) and fits the paper's batch 16 (no out-of-memory up to 32) |
+| Learning-rate test (10,000 steps, batch 16, H100) | Done: **2e-5** (20.14 dB) beat 2e-4 (14.55 dB); the authors' checkpoint also stores 2e-5 |
+| Authors' checkpoint inspected | Done: step 500,000, batch 16 inferred, same training loss as our short runs (loss does not track quality) |
 | HPC roadmap phases 0-6 | Phase 0 partial; Phases 1-6 **empty** |
-| Full training reproduction | **empty** |
+| Full training reproduction | **In progress** (launched 2026-11-08): 500,000 steps in 4 chained 12 h jobs on one H100; chunk 1 done, PSNR 34.98 dB at step 125,000 |
 | Extension (new dataset / hardware comparison / GDM-VE) | **empty** |
 
 ### Results
@@ -65,7 +69,10 @@ numbers are in [docs/easley_cluster_notes.md](docs/easley_cluster_notes.md).
 | Experiment | PSNR | SSIM | Paper (Table II) |
 |---|---|---|---|
 | LDFDCT inference, pretrained checkpoint, 3,501 test images | 37.46 | 0.9155 | 37.5 / 0.92 |
-| LDFDCT trained from scratch on Easley | **empty** | **empty** | 37.5 / 0.92 |
+| LDFDCT trained from scratch on Easley, 10,000 steps, lr 2e-5 (stride-10 subset) | 20.14 | 0.4360 | 37.5 / 0.92 |
+| LDFDCT trained from scratch on Easley, 10,000 steps, lr 2e-4 (stride-10 subset) | 14.55 | 0.3669 | 37.5 / 0.92 |
+| LDFDCT trained from scratch on Easley, 125,000 of 500,000 steps, lr 2e-5 (stride-10 subset; run in progress) | 34.98 | 0.8667 | 37.5 / 0.92 |
+| LDFDCT trained from scratch on Easley, full length | **empty** | **empty** | 37.5 / 0.92 |
 | Other tasks (BRATS, PMUB) | **empty** | **empty** | see paper |
 
 The inference result validates the pipeline (checkpoint loading, data staging,
@@ -82,6 +89,10 @@ ECE_551_problems_ML/
 │   ├── hpc_tutorial.md         # full cluster setup, workflow, troubleshooting log
 │   ├── hpc_quickstart.md       # one-page version of the tutorial
 │   ├── easley_cluster_notes.md # partitions, QOS limits, storage, measured numbers
+│   ├── run_options_and_bounds.md # how to run each kind of task, limits, results so far, baseline plan
+│   ├── images/                 # expected-output screenshots and result figures used in the docs
+│   ├── images_src/build_images.py # regenerates them (stdlib + headless Chrome) from real output text and docs/results/
+│   ├── results/                # evaluation CSVs copied from the cluster (feed the PSNR/SSIM figure)
 │   ├── fast_ddpm_theory.md     # theory notes on the paper
 │   ├── fast_ddpm_code_notes.pdf    # 24-slide code walkthrough
 │   └── code_notes_src/build.py     # generates the slides
@@ -89,7 +100,15 @@ ECE_551_problems_ML/
 │   ├── ldfdct_smoke_test.sh        # inference run on the full LDFDCT test set
 │   ├── ldfdct_train_smoke.sh       # short training run
 │   ├── ldfdct_train_resume.sh      # resume test (same run plus --resume_training)
-│   └── bs_limit_test.sh            # batch-size limit job array
+│   ├── bs_limit_test.sh            # batch-size limit job array
+│   ├── lr_test.sh                  # learning-rate test (2-task array)
+│   ├── eval_checkpoints.sh         # PSNR/SSIM of training checkpoints
+│   ├── authors_loss_probe.sh       # training loss of the authors' checkpoint
+│   ├── baseline_train.sh           # one 125,000-step chunk of the baseline
+│   └── submit_baseline.sh          # queues the chunks and evaluations
+├── patches/0001-training-controls.patch  # --max_steps, --no_first_ckpt, atomic checkpoints
+├── scripts/plot_loss.py            # loss curves from a run's stdout.txt
+├── notebooks/fast_ddpm_viewer.ipynb      # image viewer for Colab / Easley JupyterHub
 └── fast-ddpm/              # git submodule: our fork of mirthAI/Fast-DDPM
 ```
 

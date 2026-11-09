@@ -138,8 +138,13 @@ original roadmap document.
   every slice of each case is present.
 
 ### Open questions and risks
-- **Learning rate:** paper 2e-4 vs config 2e-5. Blocks any from-scratch
-  comparison; settle it early.
+- **Learning rate:** settled at **2e-5** (2026-11-03). The authors' checkpoint stores an
+  Adam optimizer with lr 2e-5, matching the repo config, and a 10,000-step test at batch 16
+  favored it (PSNR 20.14 vs 14.55 dB for the paper's 2e-4). Details in
+  [run_options_and_bounds.md](run_options_and_bounds.md) section 3.
+- **Training loss does not track quality.** A 10,000-step model and the authors'
+  500,000-step model have the same loss (about 3,300) but score 14 to 20 dB against 37.5 dB.
+  Monitor PSNR/SSIM on held-out data, not loss.
 - **Easley capacity:** non-preemptible GPUs are 12 L40S (3 nodes x 4) and 8 H100
   (4 nodes x 2); all 36 L40S are reachable only through preemptible `scavenger`.
   Still unknown: how many GPUs one user can hold at once and whether multi-node
@@ -255,8 +260,13 @@ Themes the project should cover to round it out. Status: done / partial / empty
       partition/gres override and tags results by GPU (see `easley_cluster_notes.md`).
 - [ ] Extension after the HPC roadmap (H100 comparison vs. new dataset vs.
       GDM-VE comparison) — revisit once Phase 4 results are in.
-- [ ] Learning rate: 2e-4 (paper) or 2e-5 (config)? Needed before Phase 3's
-      batch-semantics decision and Phase 5's from-scratch run.
+- [x] ~~Learning rate: 2e-4 (paper) or 2e-5 (config)?~~ — **2e-5**: stored in the
+      authors' checkpoint optimizer (step 500,000, batch 16 inferred from 13,211 pairs /
+      826 steps per epoch) and better in our 10,000-step test. See `run_options_and_bounds.md`.
+- [ ] Baseline pass/fail thresholds (proposed: full test set PSNR >= 37.15 and SSIM >= 0.910;
+      stop at 50,000 steps if PSNR is still below ~25 dB). Waiting for the project owner to confirm.
+- [ ] Baseline length: 500,000 steps (the authors' checkpoint) rather than the paper's
+      stated 400,000; about 47.5 h on one H100, run as four chained 125,000-step jobs.
 - [ ] GPU allocation. Known: `interactive` allows 1 node per user; the
       `easley-general` QOS (512 CPUs per user) applies only to the CPU-only
       `general` partition. Empty: the QOS and limits of the `h100` and `l40s`

@@ -2,6 +2,8 @@
 
 One-page version of [hpc_tutorial.md](hpc_tutorial.md). Use this to get running;
 use the full tutorial for the reasons behind each step and the troubleshooting log.
+To pick a partition, GPU and job shape for a task, and to see the limits that apply,
+use [run_options_and_bounds.md](run_options_and_bounds.md).
 
 `<...>` marks a value to replace. Do not paste it literally into the shell.
 
@@ -105,6 +107,16 @@ To resume after a stop, add `--resume_training` with the same `--exp` and `--doc
 | Partitions | `sinfo` |
 | GPU names | `scontrol show node <node> \| grep -i gres` |
 | Interactive GPU | `srun --partition=interactive --gres=gpu:l40s:1 --time=00:30:00 --pty bash` |
+
+**Job shapes** (full table in [hpc_tutorial.md](hpc_tutorial.md) §5a):
+| Shape | Looks like in `squeue` | GPUs | Concurrent? |
+|---|---|---|---|
+| Single job | `1399885` | what `--gres` asks for (1) | n/a |
+| Job array | `1398929_0`, `1398929_1` | 1 per task, separate allocations | yes, if GPUs are free |
+| Dependency chain | second job shows `(Dependency)` | 1 each | no, one after the other |
+| Multi-GPU / multi-node (planned) | one ID | several, used together | n/a |
+
+One job ID is one allocation. A job sees only its own GPUs.
 
 Package installs do not need a GPU: do them on the login node.
 `nvidia-smi` only works inside a GPU allocation.

@@ -2,3 +2,5 @@
 slurm/*.out
 slurm/*.err
 slurm/bs_mem_*.csv
+docs/images_src/html/
+docs/code_notes_src/slides.html

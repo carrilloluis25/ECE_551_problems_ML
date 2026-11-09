@@ -223,6 +223,76 @@ Point config `data.train_dataroot`/`sample_dataroot` at the **absolute**
 scratch path — do not copy dataset files into `fast-ddpm/` itself, that's a
 git submodule and multi-GB image data has no business anywhere near it.
 
+### 5a. Job shapes: telling the different kinds of runs apart
+
+(To decide which partition, GPU and shape a task needs, and what limits apply, see
+[run_options_and_bounds.md](run_options_and_bounds.md).)
+
+"A job ID" does not say how a run was launched. These are the shapes used in this
+project; always record which one a result came from.
+
+**Rule of thumb.** One job ID = one allocation = whatever `--gres` it asked for.
+SLURM confines a job to its own GPUs (`CUDA_VISIBLE_DEVICES`), so inside a job
+`nvidia-smi` shows only those cards, even on a 4-GPU node. Two jobs on one node
+use different cards and cannot touch each other's memory.
+
+| Shape | How it is launched | Job IDs in `squeue` | GPUs per ID | Runs at the same time? | Used here for |
+|---|---|---|---|---|---|
+| **Single job** | `sbatch script.sh` | `1399885` | what `--gres` says (so far 1) | n/a | inference reproduction, training smoke test, resume |
+| **Job array** | `#SBATCH --array=0-1` | `1398929_0`, `1398929_1` | each task gets its own allocation (1 each) | **yes**, if GPUs are free | batch-size tests, learning-rate test |
+| **Dependency chain** | `sbatch --dependency=afterany:<id> ...` | `1399885`, then `1399886` | 1 each | **no**, the second waits (`(Dependency)`) | evaluating the two LR runs one after the other; later, the 400,000-step baseline split into resumable jobs |
+| **Multi-GPU job** (planned, Phase 3) | `--gres=gpu:h100:2` + `torchrun` | one ID | 2 or more, used together by one program | n/a | DDP training |
+| **Multi-node job** (planned, Phase 4) | `--nodes=2` | one ID | across nodes | n/a | scaling tests; permission not yet verified |
+
+Naming used in this project:
+- `1398929` is the array's master ID (`%A`); `_0` and `_1` are task indices (`%a`).
+  `sacct` and `squeue` list each task as its own job, with its own state and node.
+- A task is chosen in the script with `$SLURM_ARRAY_TASK_ID` (e.g. `LRS=(0.0002 0.00002)`).
+- Output files: `%j` for a single job (`fastddpm-eval-1399885.out`) and `%A_%a` for an
+  array task (`fastddpm-lr-1398929_0.out`). Use `%A_%a` in array scripts, or tasks
+  overwrite each other's logs.
+
+**Why the LR runs were an array but the evals were a chain.** The two LR runs
+touch separate folders (`lr_test_0.0002`, `lr_test_0.00002`), so they could run side
+by side on the two H100s of `easley053`. The two eval jobs write to the same
+`LDSUB_test_s10` symlink folder, and `interactive` allows one node per user, so they
+were chained.
+
+**How to identify a job after the fact**
+
+```bash
+# state, partition, GPU request, node, and how long it ran
+sacct -j <jobid> --format=JobID,JobName%20,Partition,AllocTRES%40,NodeList,State,Elapsed
+# every task of an array, then everything the user has run today
+sacct -j <array_id> --format=JobID,State,NodeList,Elapsed
+sacct -u $USER -S today --format=JobID,JobName%20,Partition,State,Elapsed
+# why a pending job is waiting, and what it depends on
+scontrol show job <jobid> | grep -E "JobState|Reason|Dependency|ArrayTaskId|TresPerNode|NodeList"
+```
+
+Add this to a script when you want its log to say what shape it was:
+
+```bash
+echo "job=$SLURM_JOB_ID array=${SLURM_ARRAY_JOB_ID:-none} task=${SLURM_ARRAY_TASK_ID:-none} node=$SLURMD_NODENAME gpus=$CUDA_VISIBLE_DEVICES"
+```
+
+**Pending reasons seen on Easley**
+
+| `squeue` reason | Meaning |
+|---|---|
+| `(Resources)` | Waiting for free GPUs. Normal. |
+| `(Dependency)` | Waiting for the job named in `--dependency` to end. |
+| `(QOSMaxNodePerUserLimit)` | Partition QOS allows one node per user (`interactive`). |
+| `launch failed requeued held` / `user env retrieval failed` | Task was held on certain H100 nodes. Pin with `--nodelist=easley053`, or resubmit. See the troubleshooting log. |
+
+What those states look like in `squeue --me` (real output; the numbers explain each row):
+
+![Reading squeue: running, waiting on a dependency, held](images/term_squeue_states.png)
+
+**Record this for every result** (job ID or array ID_task, partition, GPU model, node,
+batch size, learning rate, step count). A number without its job shape is hard to
+reproduce: 15.7 images/s is a single L40S, and 47 images/s is a single H100.
+
 ## 6. Workflow: from clean checkout to reproduced results
 
 1. **Inference smoke test** — pretrained checkpoint (Hugging Face
@@ -412,3 +482,36 @@ assumed, not confirmed, at the time this was written.
   signal you needed (e.g. a smoke test confirming the pipeline works after
   a handful of samples), `scancel <jobid>` rather than waiting out a run you
   don't need to finish — frees the GPU for other cluster users.
+- **Job held with `user env retrieval failed requeued held` on the `h100` partition**
+  — seen on array tasks, a training chunk and a test job. The node accepts the job,
+  fails to retrieve the user's environment, and requeues it with priority 0, so it
+  never runs and `NodeList` stays empty. **Cause (tested 2026-11-08):** submitting
+  with `--export=ALL,VAR=value`. Two identical 5-minute jobs on `easley051` differed
+  only in that flag: the plain job completed, the `--export` job was held. The same job
+  with the variable set in the shell instead (`TOTAL=500000 sbatch ...`, default
+  `--export=ALL`) ran and the variable arrived. **Fix:** pass variables through the
+  submitting shell's environment, not `--export`. `submit_baseline.sh` does this for
+  the H100 training chunks; eval jobs on `interactive` still use `--export` and work.
+  A held job does not release itself: `scancel` it. Diagnose with
+  `scontrol show job <id> | grep -E "JobState|Reason|NodeList|Restarts"`:
+
+  ![Diagnosing a held job with scontrol and sacct](images/term_held_diagnosis.png)
+- **A job pinned with `--nodelist` waits far longer than needed** — on 2026-11-08 both
+  H100s of `easley053` were held by two other users' 8-hour jobs while `easley051` and
+  `easley054` sat idle (`sinfo -p h100 -N -o "%N %t %G %C"` and
+  `squeue -p h100 -o "%.9i %.9u %.10T %.10M %.11l %.8N %b"` show this). Check what is
+  on the nodes before pinning. Prefer excluding a bad node (`--exclude=easley052`, which
+  was down) to pinning a good one. `squeue --me --start` gives the scheduler's estimate. What the node check looked like:
+
+  ![sinfo and squeue showing easley053 busy while easley051 and easley054 were idle](images/term_h100_nodes.png)
+- **A chain with `--dependency=afterok` continues after a crash** — a batch job's exit
+  code is that of its last command. If the script ends with `ls` or `echo`, a Python
+  crash earlier still gives exit code 0 and the next job starts. Save python's status
+  (`RC=$?`) and finish with `exit $RC` (`baseline_train.sh` does).
+- **A learning rate written as `2e-5` in a YAML config** — PyYAML reads `2e-5` as a
+  string, not a float, which breaks the optimizer or is silently misread. Write
+  `0.00002` (or `2.0e-5`).
+- **Rerunning a "fresh start" command deletes the run folder** — the training code
+  removes an existing `--doc` folder unless `--resume_training` is given. Before
+  rerunning `submit_baseline.sh`, check that `ckpt.pth` exists in the run's folder
+  (otherwise a second chunk-1 job would delete the one that is running).

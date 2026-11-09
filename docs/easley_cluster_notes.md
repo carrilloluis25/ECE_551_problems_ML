@@ -4,6 +4,8 @@ Reference facts about the UNM Alliance HPC cluster as it applies to this project
 with the command that produced each one. Recorded 2026-11-02 unless noted.
 Statuses: **confirmed** (seen in command output or a log), **computed** (derived
 from confirmed numbers), **unverified** (inferred or not yet checked).
+For choosing how to run something and the limits that apply, see
+[run_options_and_bounds.md](run_options_and_bounds.md); this file holds the raw facts.
 
 ---
 
@@ -19,8 +21,8 @@ From the cluster's published resource table (screenshot supplied by the user):
 Observed on Easley (`scontrol show node <node> | grep -i gres`, `nvidia-smi`):
 - `easley058`: 4x L40S, 64 CPUs, ~257 GB RAM (**confirmed**). Not every node has
   GPUs: `easley001` shows no GPU resource (**confirmed**).
-- GPU resource names: `gpu:l40s` (**confirmed**). `gpu:h100`: **unverified**,
-  check before use.
+- GPU resource names: `gpu:l40s` and `gpu:h100` (**confirmed**: both are used in
+  `#SBATCH --gres` lines of jobs that ran; `nvidia-smi` reports "NVIDIA H100 NVL").
 - L40S: `nvidia-smi` reports 46,068 MiB; PyTorch reports 44.40 GiB usable
   (**confirmed**). Driver 570.211.01, CUDA 12.8.
 - To my knowledge L40S cards have no NVLink (**unverified**). Check with
@@ -76,13 +78,26 @@ delay large jobs, and `GrpTRES` was blank for this account, so no group GPU cap
 was visible. A GPU-hour allocation could still be tracked elsewhere
 (**unverified**; ask the staff).
 
+**Added 2026-11-03** (`sacctmgr show qos format=Name,MaxWall,MaxTRESPU,MaxJobsPU,GrpTRES`,
+`sacctmgr show assoc user=$USER format=Account,Partition,QOS,GrpTRES,GrpTRESMins,MaxTRES,MaxTRESMins,MaxWall,MaxJobs`):
+- The account's associations show **no** `GrpTRESMins`, `MaxTRESMins`, `MaxWall` or `MaxJobs`
+  (**confirmed**), so no GPU-hour cap is set in SLURM.
+- Per-user QOS CPU caps on the Easley QOS rows: `easley-h1+` 64, `easley-l4+` 96,
+  `easley-in+` 64, `easley-de+` 128, `easley-ge+` 512. The names are truncated, so the
+  mapping to h100 / l40s / interactive / debug / general is **assumed**.
+- The **GPU part** (`gres/...`) of the per-user limits was cut off by column width, so the
+  per-user GPU cap on `h100` and `l40s` is still **unverified**. Rerun:
+  `sacctmgr show qos format=Name%22,MaxWall,MaxTRESPU%70,MaxJobsPU,GrpTRES%40 | grep -iE "name|easley"`.
+- Other QOS rows seen: `large-alloc` (3 days, `cpu=1024`) and `extended` (5 days, `cpu=1`, 1 job).
+- `sshare -u $USER` is the correct form (`-u $lc2025` fails with an empty variable).
+
 ## 4. Storage
 
 | Path | What it is | Notes |
 |---|---|---|
-| `/users/<netid>` | Home (`chama:/home/homes`, 133 TB total, 80 TB free at the time) | Per-user quota **unverified** (`quota -s` was not checked) |
+| `/users/<netid>` | Home (`chama:/home/homes`, 133 TB total, 80 TB free at the time) | Quota (`quota -s`, 2026-11-03): **100 GB soft, 200 GB hard**, about 4.3 M files; 36 GB and 191k files used (**confirmed**) |
 | `/projects` | Shared project space (`chama:/home/carc_projects`) | Has `.snapshot` backups |
-| `/carc/scratch` | Scratch (1.2 PB, 524 TB free at the time) | **Purge policy unverified** |
+| `/carc/scratch` | Scratch (1.2 PB, 509 TB free on 2026-11-03) | **Purge policy unverified.** Per-user quota unverified (`lfs` is not installed on the login node) |
 | `~/carc-scratch` | Symlink to `/carc/scratch/users/<netid>` | Created by the admins; set up in 2024 |
 
 Layout used by this project, all under `~/carc-scratch`:
@@ -189,6 +204,10 @@ Findings:
   400,000 x 0.342 s = 38 hours on one H100, plus roughly 1 hour of checkpoint writes if
   saved every 5,000 steps. That fits inside one 2-day `h100` job. It assumes the speed holds
   and the job is not interrupted (against about 112 hours on one L40S).
+  **Update 2026-11-03:** the authors' released checkpoint is at **500,000** steps, and the
+  baseline run targets that: 500,000 x 0.342 s = **47.5 hours**, which leaves almost no
+  margin in a 48-hour limit, so it runs as four chained 125,000-step jobs. The 10,000-step
+  learning-rate runs measured 29 min per 5,000 steps (0.348 s/step), matching 0.342.
 
 ## 6. Hopper
 
@@ -226,4 +245,8 @@ If it does, Hopper's A100s (80 GB) would fit the paper's batch size of 16.
 - Per-user GPU limits and any GPU-hour allocation for my account?
 - What are the per-user limits on the `h100` and `l40s` partitions, and can I run multi-node jobs there?
 - Scratch purge policy and per-user quota?
-- Gres name for the H100 cards?
+- Gres name for the H100 cards? (`gpu:h100` worked in job scripts; `nvidia-smi` reports "NVIDIA H100 NVL".)
+- Why are H100 jobs submitted with `--export=ALL,VAR=...` held with "user env retrieval failed
+  requeued held"? (Tested 2026-11-08 on `easley051`: the same job without `--export` ran; a
+  variable set in the shell instead of `--export` also ran. We work around it.)
+- Is there a GPU-hour allocation tracked outside SLURM (a CARC portal)?
