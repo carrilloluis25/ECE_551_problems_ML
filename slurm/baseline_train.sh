@@ -27,6 +27,9 @@ source ~/.bashrc
 conda activate fastddpm
 cd ~/ECE_551_problems_ML/fast-ddpm
 
+# fail fast, with a clear message, if scratch refuses writes (group quota exceeded: chunks 3 and 4 died of this)
+dd if=/dev/zero of=$EXP/.quota_probe bs=1M count=100 2>/dev/null && rm -f $EXP/.quota_probe || { rm -f $EXP/.quota_probe; echo "ERROR: cannot write to $EXP (scratch group quota exceeded?). Free space first."; exit 1; }
+
 grep -q "max_steps" fast_ddpm_main.py || { echo "ERROR: apply patches/0001-training-controls.patch first"; exit 1; }
 
 # 0.00002, not 2e-5: PyYAML reads 2e-5 as a string
@@ -52,6 +55,17 @@ python fast_ddpm_main.py \
   --scheduler_type uniform --timesteps 10 \
   --max_steps $TARGET --no_first_ckpt $RESUME
 RC=$?     # the job's exit code must be python's, or --dependency=afterok would continue after a crash
+
+# python's exit code alone is NOT enough: on 2026-11-10 a chunk crashed on "Disk quota exceeded" at step
+# 350,511 and still reported exit 0, so the chain went on (the fork's main apparently catches exceptions).
+# Trust the checkpoint instead: the chunk only counts as done if ckpt.pth reached the chunk's TARGET step.
+if [ "$RC" -eq 0 ]; then
+  END=$(python -c "import sys, torch; print(torch.load(sys.argv[1], map_location='cpu', weights_only=False)[3])" "$LOGDIR/ckpt.pth" 2>/dev/null)
+  if [ "${END:-0}" -lt "$TARGET" ]; then
+    echo "ERROR: python exited 0 but ckpt.pth is at step ${END:-unreadable}, short of the target $TARGET (crash swallowed?)"
+    RC=1
+  fi
+fi
 
 echo "=== python exit code $RC | $(grep 'step:' $LOGDIR/stdout.txt | tail -1) ==="
 ls -lh $LOGDIR | tail -n +2

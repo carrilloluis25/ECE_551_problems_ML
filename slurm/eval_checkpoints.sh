@@ -54,12 +54,18 @@ CSV=$OUT/eval_${DOC}.csv
 [ -f "$CSV" ] || echo "ckpt,psnr,ssim,s_per_batch,stride" > "$CSV"
 
 for N in $CKPTS; do
+  if [ ! -e "$EXP/logs/$DOC/ckpt_${N}.pth" ]; then
+    echo "SKIP ${N}: $EXP/logs/$DOC/ckpt_${N}.pth does not exist"
+    continue
+  fi
   CFG=eval_${DOC}_${N}.yml
   sed "s#sample_dataroot: .*#sample_dataroot: \"$TESTDIR\"#; s/ckpt_id: .*/ckpt_id: [${N}]/" configs/ldfd_smoke_test.yml > configs/$CFG
   python fast_ddpm_main.py --config $CFG --dataset LDFDCT \
     --exp $EXP --doc $DOC --sample --fid \
     --scheduler_type uniform --timesteps 10 2>&1 | tee $OUT/eval_${DOC}_${N}.log
   LINE=$(grep "Average: PSNR" $OUT/eval_${DOC}_${N}.log | tail -1 | sed -E 's/.*Average: PSNR ([0-9.]+), SSIM ([0-9.]+), time ([0-9.]+).*/\1,\2,\3/')
+  # a failed evaluation must leave a visibly failed row (NA), not a short row with missing columns
+  [ -n "$LINE" ] || LINE="NA,NA,NA"
   echo "${N},${LINE},${STRIDE}" >> "$CSV"
   rm -rf $EXP/image_samples/$DOC      # generated images only; checkpoints are untouched
 done

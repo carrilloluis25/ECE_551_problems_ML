@@ -515,3 +515,27 @@ assumed, not confirmed, at the time this was written.
   removes an existing `--doc` folder unless `--resume_training` is given. Before
   rerunning `submit_baseline.sh`, check that `ckpt.pth` exists in the run's folder
   (otherwise a second chunk-1 job would delete the one that is running).
+- **`Disk quota exceeded` on `/carc/scratch` stops a long run (2026-11-10)** — the quota
+  is **100 GiB per group** (`lc2025`), shared by everything you keep on scratch, not just the
+  current project. The login banner warns `The storage quota for group <group> on
+  /carc/scratch has been exceeded (101.23GiB/100.00GiB)`. Here it killed two training
+  chunks and an evaluation: the baseline's checkpoints (1.7 GB each, one per 25,000 steps)
+  pushed total use over the limit, and the next write failed. The errors appear in the
+  job's `.err`, not in the exit code:
+  - training: `OSError: [Errno 122] Disk quota exceeded: '.../tensorboard/<doc>/events.out.tfevents...'`
+  - evaluation: the same error when saving `.../image_samples/<doc>/images_fid/<step>_0_pt.png`
+
+  **Check usage before a long run:** `du -sh ~/carc-scratch/` (the trailing slash matters:
+  `~/carc-scratch` is a symlink and plain `du` reports 0). **Test whether writes work:**
+  `dd if=/dev/zero of=~/carc-scratch/.writetest bs=1M count=100 && rm ~/carc-scratch/.writetest && echo WRITE_OK`.
+  After deleting 17.7 GB the write test still failed for the first couple of minutes (twice), then passed: the quota counter lags a little behind `du`, so retry before assuming the delete did not help. `baseline_train.sh` now runs that
+  write test first and stops with a clear message.
+- **A crashed training job reports exit code 0 (2026-11-10)** — `fast_ddpm_main.py` wraps its
+  work in `except Exception:` (it logs the traceback) and then `return 0`. So a crash, such as
+  the quota error above, looks like a clean finish and `--dependency=afterok` carries on.
+  Saving python's `$?` (the entry above) is not enough here. `baseline_train.sh` therefore
+  also checks that the step stored in `ckpt.pth` reached the chunk's target, and exits 1 if
+  not. Evaluations that fail now leave a visible `NA,NA,NA` row instead of a short one.
+- **Restarting after a crash** — with `ckpt.pth` intact, rerun the chain from the step it
+  holds: `START=350000 DRY=1 bash submit_baseline.sh`, then without `DRY=1`. `START` skips the
+  chunks that already finished, and cancel the old pending jobs first (`scancel`).

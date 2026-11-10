@@ -3,7 +3,9 @@
 # after each chunk. Run from the slurm folder (not with sbatch):
 #   DRY=1 bash submit_baseline.sh      # print what would be submitted, submit nothing
 #   bash submit_baseline.sh            # submit for real
-# Variables (defaults): TOTAL=500000 CHUNK=125000 EVERY=25000 DOC=baseline_bs16_lr2e-5 NODELIST=easley053
+# Variables (defaults): TOTAL=500000 CHUNK=125000 EVERY=25000 DOC=baseline_bs16_lr2e-5 NODELIST=easley053 START=0
+#   START=<step>: restart after a crash. Chunks that end at or before START are not submitted (pass the
+#   step that ckpt.pth holds, e.g. START=350000). Training itself always resumes from ckpt.pth.
 #   NODELIST= (empty) removes the node pin; easley053 is the node where H100 tasks were not held.
 #
 # Chaining rules:
@@ -15,6 +17,7 @@
 TOTAL=${TOTAL:-500000}
 CHUNK=${CHUNK:-125000}
 EVERY=${EVERY:-25000}
+START=${START:-0}
 DOC=${DOC:-baseline_bs16_lr2e-5}
 NODELIST=${NODELIST-easley053}
 NODE_ARG=(); [ -n "$NODELIST" ] && NODE_ARG=(--nodelist="$NODELIST")
@@ -28,6 +31,7 @@ N=$(( (TOTAL + CHUNK - 1) / CHUNK ))
 PREV_TRAIN=""; PREV_EVAL=""
 for ((i = 1; i <= N; i++)); do
   LO=$(( (i - 1) * CHUNK )); HI=$(( i * CHUNK )); [ "$HI" -gt "$TOTAL" ] && HI=$TOTAL
+  [ "$HI" -le "$START" ] && continue      # restart: this chunk is already done
   DEP=(); [ -n "$PREV_TRAIN" ] && DEP=(--dependency=afterok:$PREV_TRAIN)
   # No --export here: on the H100 nodes, a job submitted with --export=ALL,VAR=... was held with
   # "user env retrieval failed". The variables go through the environment instead (default --export=ALL).

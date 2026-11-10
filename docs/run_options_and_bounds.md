@@ -168,7 +168,9 @@ is why loss could not choose between the learning rates.
 
 ### 3.3 Baseline trajectory (from scratch, batch 16, lr 2e-5, one H100; stride-10 subset)
 
-Chunk 1 (job 1410422, 12:01:15 on `easley054`) and its eval (job 1410423, 11:39 on `easley057`):
+Chunk 1 (job 1410422, 12:01:15 on `easley054`) and its eval (job 1410423, 11:39 on `easley057`);
+chunk 2 (job 1410424, 11:59:05 on `easley051`) and its eval (job 1410425, 11:30 on `easley055`).
+Chunk 3 (job 1410426) crashed at step 350,511 on the scratch quota; see section 3.4.
 
 | Step | PSNR (dB) | SSIM | Gain over previous 25k steps (dB) |
 |---:|---:|---:|---:|
@@ -177,12 +179,17 @@ Chunk 1 (job 1410422, 12:01:15 on `easley054`) and its eval (job 1410423, 11:39 
 | 75,000 | 28.39 | 0.7190 | +4.2 |
 | 100,000 | 32.49 | 0.8144 | +4.1 |
 | 125,000 | 34.98 | 0.8667 | +2.5 |
+| 150,000 | 36.20 | 0.8913 | +1.2 |
+| 175,000 | 36.75 | 0.9019 | +0.55 |
+| 200,000 | 37.00 | 0.9067 | +0.25 |
+| 225,000 | 37.16 | 0.9098 | +0.16 |
+| 250,000 | 37.23 | 0.9110 | +0.07 |
 | authors' checkpoint (step 500,000) | 37.46 | 0.9153 | |
 
 ![PSNR and SSIM against training step for the baseline and the learning-rate tests](images/fig_psnr_vs_step.png)
 
 (Regenerate with `python3 docs/images_src/build_images.py` after copying new eval CSVs into
-`docs/results/`; the chunks not yet run are shaded.)
+`docs/results/`; the part not yet scored is shaded.)
 
 - **Training works from scratch in our setup.** PSNR rises steadily; the 10,000-step LR test
   (20.14 dB) sits at the start of this curve.
@@ -190,8 +197,22 @@ Chunk 1 (job 1410422, 12:01:15 on `easley054`) and its eval (job 1410423, 11:39 
 - **The 25 dB early-warning cutoff was too crude.** At 50,000 steps PSNR was 24.22, below the
   cutoff, yet the run was gaining 3 to 4 dB per 25,000 steps. We continued. The cutoff was a
   judgment made without a reference curve; a slope rule is better (see section 4).
-- **Gains are shrinking** (+4.1, then +2.5 dB). Five points do not support a prediction of the
-  final value; the remaining chunks will show whether it reaches the threshold.
+- **Gains are shrinking fast.** Each 25,000 steps adds roughly half of the previous gain
+  (+2.5, +1.2, +0.55, +0.25, +0.16, +0.07 dB). At 250,000 steps the subset score is already
+  above the proposed full-test-set bar (37.15 dB, 0.910), but a subset score is not a pass.
+  If the halving continues the curve flattens near 37.3 dB, a little under the authors' 37.46
+  (an extrapolation from a few points, not a measurement). If so, the second half of the
+  schedule buys about 0.1 dB for about 24 H100-hours; the scores for 275k to 500k will
+  confirm or refute it.
+
+### 3.4 Chunk 3 and 4 failures (2026-11-10): scratch quota
+
+Chunk 3 stopped at step 350,511 and chunk 4 died after 26 s; both with
+`OSError 122: Disk quota exceeded` (TensorBoard event file), and the eval of chunk 3 failed
+saving a sample image. The group quota on `/carc/scratch` is 100 GiB (we were at 101.23). The
+chain did not stop cleanly because the fork's `main` catches exceptions and returns 0. The last
+good checkpoint, `ckpt_350000.pth`, was intact. See the troubleshooting log in `hpc_tutorial.md`
+for the fix and the restart command.
 
 ---
 
@@ -238,9 +259,10 @@ After a chunk and its evaluation finish:
 ones pending as `DependencyNeverSatisfied`.
 1. `scancel` the stuck jobs.
 2. Check the last checkpoint: `ls -l ~/carc-scratch/fastddpm-exp/logs/baseline_bs16_lr2e-5/`.
-3. Rerun `bash submit_baseline.sh`. Each job computes its target from the latest
-   `ckpt.pth`, and a job already past the total exits at once. Duplicate rows in the CSV
-   are harmless.
+3. Rerun the chain from the step `ckpt.pth` holds, e.g. `START=350000 bash submit_baseline.sh`
+   (add `DRY=1` first). Chunks that end at or before `START` are not submitted; each job still
+   computes its target from the latest `ckpt.pth`. Check that a quota error or other crash is
+   fixed first: the 2026-11-10 failure is in the troubleshooting log.
 
 A crash costs at most the steps since the last checkpoint (up to 25,000, about
 2.4 h).

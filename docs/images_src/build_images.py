@@ -330,7 +330,7 @@ def chart_html():
         s = [f'<text x="{ox + 56}" y="{top - 24}" font-size="14" font-weight="600" fill="#1b1f24">{ylabel}</text>']
         # pending region
         s.append(f'<rect x="{sx(last)}" y="{top}" width="{sx(total) - sx(last)}" height="{ph}" fill="#eef0f3"/>')
-        s.append(f'<text x="{(sx(last) + sx(total)) / 2}" y="{top + ph * 0.62}" font-size="11" fill="#7a8290" text-anchor="middle">not yet run (chunks 2 to 4)</text>')
+        s.append(f'<text x="{(sx(last) + sx(total)) / 2}" y="{top + ph * 0.62}" font-size="11" fill="#7a8290" text-anchor="middle">not yet scored (after {last // 1000}k)</text>')
         for t in ticks:
             s.append(f'<line x1="{ox + 56}" x2="{ox + pw - 12}" y1="{sy(t)}" y2="{sy(t)}" stroke="#d8dce2"/>')
             s.append(f'<text x="{ox + 50}" y="{sy(t) + 4}" font-size="11" fill="#4a5260" text-anchor="end">{fmt(t)}</text>')
@@ -357,7 +357,7 @@ def chart_html():
         for x, v in pts:
             s.append(f'<circle cx="{sx(x)}" cy="{sy(v)}" r="4" fill="#1f5fbf"/>')
         x, v = pts[-1]
-        s.append(f'<text x="{sx(x) + 8}" y="{sy(v) + 16}" font-size="11" fill="#1f5fbf">{fmt(v)} at {x // 1000}k</text>')
+        s.append(f'<text x="{sx(x) - 6}" y="{sy(v) + 36}" font-size="11" fill="#1f5fbf" text-anchor="end">{fmt(v)} at {x // 1000}k</text>')
         return "".join(s)
 
     left = panel(0, "psnr", 10, 40, [10, 15, 20, 25, 30, 35, 40], ref_psnr, thr_psnr, lambda v: f"{v:.2f}" if isinstance(v, float) and v % 1 else f"{v:g}", "PSNR (dB), higher is better")
