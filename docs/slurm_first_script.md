@@ -244,6 +244,8 @@ be `OK`. Importing PyTorch is most of the run time (11 s on the L40S, 4 s on the
 | `ModuleNotFoundError` / `conda: command not found` | the batch shell did not load conda | `source ~/.bashrc` then `conda activate <env>` at the top of the commands |
 | No output file appears | the folder named in `--output` does not exist (**general SLURM behavior**) | create it first, or write to the current folder |
 | `CUDA out of memory` | the job needs more GPU memory than the card has | lower the batch size, or use the H100 |
+| `OSError: [Errno 122] Disk quota exceeded` in `.err` | scratch is over its 100 GiB **group** quota | `du -sh ~/carc-scratch/` (trailing slash), delete what you no longer need, retry after a few minutes |
+| `COMPLETED 0:0` but the work stopped early | some programs catch their own errors and still exit 0 (Fast-DDPM's `main` does) | read the `.err` and the program's own log; do not trust the exit code alone |
 
 ## 8. What to try next
 

@@ -98,7 +98,7 @@ was visible. A GPU-hour allocation could still be tracked elsewhere
 |---|---|---|
 | `/users/<netid>` | Home (`chama:/home/homes`, 133 TB total, 80 TB free at the time) | Quota (`quota -s`, 2026-11-03): **100 GB soft, 200 GB hard**, about 4.3 M files; 36 GB and 191k files used (**confirmed**) |
 | `/projects` | Shared project space (`chama:/home/carc_projects`) | Has `.snapshot` backups |
-| `/carc/scratch` | Scratch (1.2 PB, 509 TB free on 2026-11-03) | **Purge policy unverified.** Per-user quota unverified (`lfs` is not installed on the login node) |
+| `/carc/scratch` | Scratch (1.2 PB, 509 TB free on 2026-11-03) | **Group quota: 100 GiB per group (`lc2025`), confirmed 2026-11-10** by the login banner (`exceeded (101.23GiB/100.00GiB)`) and a refused write (`Disk quota exceeded`); it counts everything the group owns on scratch, so keep `du -sh ~/carc-scratch/` (trailing slash: it is a symlink) under it. Freed space was credited back a few minutes after deleting. **Purge policy still unverified** (`lfs` is not installed) |
 | `~/carc-scratch` | Symlink to `/carc/scratch/users/<netid>` | Created by the admins; set up in 2024 |
 
 Layout used by this project, all under `~/carc-scratch`:
@@ -244,7 +244,7 @@ If it does, Hopper's A100s (80 GB) would fit the paper's batch size of 16.
 - Do I have access to Hopper, and how do I log in?
 - Per-user GPU limits and any GPU-hour allocation for my account?
 - What are the per-user limits on the `h100` and `l40s` partitions, and can I run multi-node jobs there?
-- Scratch purge policy and per-user quota?
+- Scratch purge policy? Can the 100 GiB group quota (hit on 2026-11-10) be raised for a 500,000-step run?
 - Gres name for the H100 cards? (`gpu:h100` worked in job scripts; `nvidia-smi` reports "NVIDIA H100 NVL".)
 - Why are H100 jobs submitted with `--export=ALL,VAR=...` held with "user env retrieval failed
   requeued held"? (Tested 2026-11-08 on `easley051`: the same job without `--export` ran; a

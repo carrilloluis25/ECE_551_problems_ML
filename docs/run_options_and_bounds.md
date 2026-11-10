@@ -113,9 +113,9 @@ measured yet (Phases 2 to 4).
 | Location | Limit | Used by this project | Status |
 |---|---|---|---|
 | Home `/users/lc2025` | **100 GB soft, 200 GB hard**; about 4.3 M files | 36 GB, 191k files (contents not itemised) | confirmed (`quota -s`) |
-| Scratch `/carc/scratch` (via `~/carc-scratch`) | Shared 1.2 PB, 509 TB free. **Per-user quota unknown** (`lfs` is not installed) | 13 GB data, 11 GB experiments | confirmed (`df`, `du`) |
+| Scratch `/carc/scratch` (via `~/carc-scratch`) | Shared 1.2 PB. **Group quota 100 GiB** (everything owned by group `lc2025`; writes fail with `Disk quota exceeded` above it) | 101 GiB on 2026-11-10 before cleanup: `fastddpm-exp` 34 GB (baseline checkpoints 24 GB), `fastddpm-data` 13 GB, 36 GB `data` (not this project), and 17.7 GB of unrelated simulation data (deleted) | confirmed (login banner, refused write, `du -sh ~/carc-scratch/`) |
 | Scratch purge policy | unknown | | unverified |
-| Baseline run, 20 checkpoints | about 34 GB on scratch | | computed |
+| Baseline run, 20 checkpoints | about 34 GB on scratch, **more than a third of the quota**; prune scored checkpoints you do not need | | computed |
 
 Keep data and checkpoints on scratch, never in git and not in home. If scratch is
 purged, a copy of the key checkpoints in home (about 1.7 GB each) is the insurance.
@@ -274,7 +274,7 @@ A crash costs at most the steps since the last checkpoint (up to 25,000, about
 - [ ] The training-controls patch is applied to the fork on the cluster
       (`grep -c max_steps fast-ddpm/fast_ddpm_main.py` is at least 1).
 - [ ] `DRY=1 bash submit_baseline.sh` prints 4 train jobs and 5 eval jobs.
-- [ ] Scratch space for the checkpoints (about 34 GB) and a purge plan.
+- [ ] Scratch space: `du -sh ~/carc-scratch/` plus the checkpoints you will write (about 34 GB for the baseline) stays well under the **100 GiB group quota**, and there is a purge plan. The 2026-11-10 failure was this.
 - [ ] Hours: about 48 H100-hours plus evals fit your allocation (**ask the staff**; no cap visible in SLURM).
 - [ ] The pass/fail thresholds are agreed and written down above.
 - [ ] You know which node the job pins to and what to do if it queues (`squeue --start`).
@@ -284,7 +284,7 @@ A crash costs at most the steps since the last checkpoint (up to 25,000, about
 | Item | How to settle it |
 |---|---|
 | Per-user GPU cap on `h100` and `l40s` | `sacctmgr show qos format=Name%22,MaxWall,MaxTRESPU%70,MaxJobsPU,GrpTRES%40 \| grep -iE "name\|easley"` |
-| Scratch purge policy and per-user quota | CARC documentation or staff |
+| Scratch purge policy; whether the 100 GiB group quota can be raised | CARC documentation or staff |
 | GPU-hour allocation outside SLURM | staff |
 | Multi-node GPU jobs allowed | staff; decides how far Phase 4 can go |
 | H100 batch ceiling above 32; `max_memory_allocated` | Phase 0 |

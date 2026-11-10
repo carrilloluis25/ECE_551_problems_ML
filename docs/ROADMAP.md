@@ -156,7 +156,7 @@ original roadmap document.
 - **Reproducibility:** bf16 and `torch.compile` change numerics slightly. Fix
   seeds and compare against the fp32 baseline, not against exact numbers.
 - **Storage:** sharded outputs, checkpoints from many runs and pre-converted data
-  all land on scratch. Check the quota before Phase 5.
+  all land on scratch. The scratch quota is **100 GiB per group** (confirmed 2026-11-10; the baseline run alone hit it), so plan pruning or ask staff for more before Phase 5.
 
 ## Additional extension options (after the HPC roadmap)
 
@@ -279,4 +279,4 @@ Themes the project should cover to round it out. Status: done / partial / empty
       and baseline plans.
 - [ ] Reference notes: see `docs/easley_cluster_notes.md` for partitions, QOS
       limits, storage layout, measured numbers and the commands behind each.
-- [ ] Scratch purge policy and quota (checkpoints are ~1.7 GB each).
+- [x] Scratch quota: 100 GiB per group, confirmed 2026-11-10 (the baseline hit it). [ ] Purge policy still unknown (checkpoints are ~1.7 GB each).

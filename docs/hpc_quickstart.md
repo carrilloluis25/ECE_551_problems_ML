@@ -132,9 +132,11 @@ Package installs do not need a GPU: do them on the login node.
 | `CUDA out of memory` | Lower `batch_size` in the config |
 | Job killed at `TIME LIMIT` | Raise `--time`, or use the `l40s` / `h100` partition for runs over 4 hr |
 | Job fails instantly, `.out` empty | Read the `.err` file; Python errors land there |
+| `OSError: [Errno 122] Disk quota exceeded` (in `.err`, or the login banner) | Scratch is over its **100 GiB group quota**. `du -sh ~/carc-scratch/` (trailing slash), delete what you do not need, test with `dd if=/dev/zero of=~/carc-scratch/.writetest bs=1M count=100 && rm ~/carc-scratch/.writetest` |
+| A training job is `COMPLETED 0:0` but stopped early | Fast-DDPM's `main` catches exceptions and exits 0. Read the `.err` and the last `step:` line in the run's `stdout.txt` instead of trusting the exit code |
 
 ## 9. Rules of thumb
 - Test on a tiny run before a long one; queue time makes debugging at scale slow.
 - Cancel jobs you no longer need (`scancel`); GPUs are shared.
-- Keep data, checkpoints, and run output on scratch; keep only code and docs in git.
+- Keep data, checkpoints, and run output on scratch; keep only code and docs in git. Scratch has a 100 GiB group quota, and checkpoints are 1.7 GB each: check `du -sh ~/carc-scratch/` before a long run.
 - Record every new error and its fix in the full tutorial's troubleshooting log.
