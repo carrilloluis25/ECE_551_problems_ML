@@ -263,10 +263,13 @@ Themes the project should cover to round it out. Status: done / partial / empty
 - [x] ~~Learning rate: 2e-4 (paper) or 2e-5 (config)?~~ — **2e-5**: stored in the
       authors' checkpoint optimizer (step 500,000, batch 16 inferred from 13,211 pairs /
       826 steps per epoch) and better in our 10,000-step test. See `run_options_and_bounds.md`.
-- [ ] Baseline pass/fail thresholds (proposed: full test set PSNR >= 37.15 and SSIM >= 0.910;
-      stop at 50,000 steps if PSNR is still below ~25 dB). Waiting for the project owner to confirm.
-- [ ] Baseline length: 500,000 steps (the authors' checkpoint) rather than the paper's
-      stated 400,000; about 47.5 h on one H100, run as four chained 125,000-step jobs.
+- [x] Baseline pass/fail thresholds (proposed: full test set PSNR >= 37.15 and SSIM >= 0.910; the
+      25 dB early-stop at 50,000 steps proved too crude and is superseded by a slope rule).
+      **Met:** the from-scratch baseline scored 37.457 dB / 0.9155 on the full test set (2026-11-10).
+      Not formally confirmed by the project owner.
+- [x] Baseline length: 500,000 steps (the authors' checkpoint) rather than the paper's
+      stated 400,000; took about 48.6 H100-hours, run as chained 125,000-step jobs (one crashed on
+      the scratch quota and was restarted from step 350,000).
 - [ ] GPU allocation. Known: `interactive` allows 1 node per user; the
       `easley-general` QOS (512 CPUs per user) applies only to the CPU-only
       `general` partition. Empty: the QOS and limits of the `h100` and `l40s`

@@ -168,42 +168,78 @@ is why loss could not choose between the learning rates.
 
 ### 3.3 Baseline trajectory (from scratch, batch 16, lr 2e-5, one H100; stride-10 subset)
 
-Chunk 1 (job 1410422, 12:01:15 on `easley054`) and its eval (job 1410423, 11:39 on `easley057`);
-chunk 2 (job 1410424, 11:59:05 on `easley051`) and its eval (job 1410425, 11:30 on `easley055`).
-Chunk 3 (job 1410426) crashed at step 350,511 on the scratch quota; see section 3.4.
+**Result: the from-scratch baseline reproduces the paper.** Trained for 500,000 steps (batch 16,
+lr 2e-5, uniform scheduler, 10 time steps) and scored on the **full 3,501-image test set**:
+
+| | PSNR (dB) | SSIM |
+|---|---:|---:|
+| **Our baseline, step 500,000, full test set** | **37.457** | **0.9155** |
+| Authors' released checkpoint, full test set (our inference reproduction) | 37.457 | 0.9155 |
+| Paper | 37.46 | 0.9155 |
+| Pass bar set before the run | at least 37.15 | at least 0.910 |
+
+The pass bar is met, with 0.3 dB to spare on PSNR. A single training run was done, so the
+run-to-run spread is not known; the match to the authors' checkpoint to three decimals should
+not be read as that being the typical difference between two runs.
+
+Training cost, from `sacct`: about **48.6 H100-hours** in five jobs (12:01:15 + 11:59:05 +
+9:39:47 + 2:25:15 + 12:27:45) on `easley051` and `easley054`. The 9:39:47 chunk crashed at
+step 350,511 and its last 511 steps were redone after the restart (section 3.4). Evaluations
+took 9 to 12 minutes per five checkpoints on an L40S and 16.6 minutes for the full test set.
+
+The scores below are on the 355-image stride-10 subset. The subset overstates the full set by
+only 0.005 dB at 500k (37.462 against 37.457), so the subset curve is a fair monitor.
 
 | Step | PSNR (dB) | SSIM | Gain over previous 25k steps (dB) |
 |---:|---:|---:|---:|
-| 25,000 | 21.30 | 0.5055 | |
-| 50,000 | 24.22 | 0.6066 | +2.9 |
-| 75,000 | 28.39 | 0.7190 | +4.2 |
-| 100,000 | 32.49 | 0.8144 | +4.1 |
-| 125,000 | 34.98 | 0.8667 | +2.5 |
-| 150,000 | 36.20 | 0.8913 | +1.2 |
+| 25,000 | 21.30 | 0.5055 |  |
+| 50,000 | 24.22 | 0.6066 | +2.92 |
+| 75,000 | 28.39 | 0.7190 | +4.17 |
+| 100,000 | 32.49 | 0.8144 | +4.10 |
+| 125,000 | 34.98 | 0.8667 | +2.50 |
+| 150,000 | 36.20 | 0.8913 | +1.22 |
 | 175,000 | 36.75 | 0.9019 | +0.55 |
 | 200,000 | 37.00 | 0.9067 | +0.25 |
 | 225,000 | 37.16 | 0.9098 | +0.16 |
 | 250,000 | 37.23 | 0.9110 | +0.07 |
-| authors' checkpoint (step 500,000) | 37.46 | 0.9153 | |
+| 275,000 | 37.30 | 0.9123 | +0.07 |
+| 300,000 | 37.35 | 0.9132 | +0.05 |
+| 325,000 | 37.37 | 0.9136 | +0.03 |
+| 350,000 | 37.40 | 0.9141 | +0.02 |
+| 375,000 | 37.41 | 0.9144 | +0.02 |
+| 400,000 | 37.43 | 0.9147 | +0.01 |
+| 425,000 | 37.45 | 0.9150 | +0.02 |
+| 450,000 | 37.45 | 0.9149 | +0.00 |
+| 475,000 | 37.45 | 0.9151 | +0.00 |
+| 500,000 | 37.46 | 0.9152 | +0.01 |
+| authors' checkpoint, same 355 images | 37.46 | 0.9153 | |
 
 ![PSNR and SSIM against training step for the baseline and the learning-rate tests](images/fig_psnr_vs_step.png)
 
-(Regenerate with `python3 docs/images_src/build_images.py` after copying new eval CSVs into
-`docs/results/`; the part not yet scored is shaded.)
+The last 350,000 steps, zoomed (the diamond is the full-test-set score at 500,000):
 
-- **Training works from scratch in our setup.** PSNR rises steadily; the 10,000-step LR test
-  (20.14 dB) sits at the start of this curve.
-- **Checkpoints arrived every 2 h 24 min** (25,000 steps), so 0.345 s/step held for the whole chunk.
+![PSNR and SSIM from step 150k to 500k, zoomed](images/fig_psnr_zoom.png)
+
+(Regenerate with `python3 docs/images_src/build_images.py` after copying new eval CSVs into
+`docs/results/`.)
+
+- **Training works from scratch in our setup.** The 10,000-step LR test (20.14 dB) sits at the
+  start of this curve.
+- **Checkpoints arrived every 2 h 24 min** (25,000 steps); the speed was 0.345 to 0.359 s/step in
+  every chunk.
 - **The 25 dB early-warning cutoff was too crude.** At 50,000 steps PSNR was 24.22, below the
-  cutoff, yet the run was gaining 3 to 4 dB per 25,000 steps. We continued. The cutoff was a
-  judgment made without a reference curve; a slope rule is better (see section 4).
-- **Gains are shrinking fast.** Each 25,000 steps adds roughly half of the previous gain
-  (+2.5, +1.2, +0.55, +0.25, +0.16, +0.07 dB). At 250,000 steps the subset score is already
-  above the proposed full-test-set bar (37.15 dB, 0.910), but a subset score is not a pass.
-  If the halving continues the curve flattens near 37.3 dB, a little under the authors' 37.46
-  (an extrapolation from a few points, not a measurement). If so, the second half of the
-  schedule buys about 0.1 dB for about 24 H100-hours; the scores for 275k to 500k will
-  confirm or refute it.
+  cutoff, yet the run was gaining 3 to 4 dB per 25,000 steps. We continued. That was the right
+  call; a slope rule is better (see section 4).
+- **The curve has a long, slow tail.** The gain per 25,000 steps fell from +4.1 dB (75k to 100k)
+  to +0.07 dB at 250k, then +0.07 (275k) falling to +0.002 to +0.02 per 25,000 steps over the last 100,000. The subset
+  score first crossed the pass bar at 225k (37.16 dB) and was 0.24 dB short of its final value
+  at 250k. **Our earlier extrapolation was wrong**: from the 250k point we predicted the curve
+  would flatten near 37.3 dB and that the second half of the schedule would buy about 0.1 dB;
+  it bought 0.24 dB. Four points of a decaying curve were not enough to predict the tail.
+- **What this means for the time-reduction goal.** Half the steps (about 24 H100-hours) gets
+  within 0.24 dB (0.0042 SSIM) of the full schedule and above the pass bar. Whether that
+  trade is acceptable depends on how strictly "same quality" is read, so the later speed-up
+  experiments should state which reference they hold (the 500k score or the pass bar).
 
 ### 3.4 Chunk 3 and 4 failures (2026-11-10): scratch quota
 
@@ -229,7 +265,7 @@ for the fix and the restart command.
 | Launch record | Submitted 2026-11-08 as jobs 1410422 (chunk 1) to 1410430; chunk 1 started on `easley054` at about 21:36, 0.345 s/step. Two earlier submissions were cancelled before starting: a pinned one (waiting on busy `easley053`) and one held by the `--export` problem |
 | Results | `slurm/eval_baseline_bs16_lr2e-5.csv` (columns: ckpt, psnr, ssim, s_per_batch, stride) |
 
-**Pass/fail thresholds (proposed, not yet confirmed by the project owner):**
+**Pass/fail thresholds (proposed, not formally confirmed by the project owner; the finished baseline meets both, section 3.3):**
 - Final, full test set: **PSNR at least 37.15 and SSIM at least 0.910**
   (within about 0.3 dB / 0.005 of the reproduced 37.457 / 0.9155).
 - Early warning (original, absolute): if PSNR is still **below about 25 dB at 50,000 steps**,

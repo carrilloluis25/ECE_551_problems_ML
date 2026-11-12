@@ -312,8 +312,10 @@ def read_csv(name):
         return list(csv.DictReader(f))
 
 
-def chart_html():
-    base = read_csv("eval_baseline_bs16_lr2e-5.csv")
+def chart_html(zoom=False):
+    allrows = read_csv("eval_baseline_bs16_lr2e-5.csv")
+    base = [r for r in allrows if r["stride"] == "10"]
+    full = [r for r in allrows if r["stride"] == "1"]
     lr = read_csv("eval_lr_test.csv")
     ref = read_csv("eval_ldfdct_smoke_test.csv")[0]
     ref_psnr, ref_ssim = float(ref["psnr"]), float(ref["ssim"])
@@ -321,20 +323,21 @@ def chart_html():
     total = 500_000
     last = max(int(r["ckpt"]) for r in base)
 
-    def panel(ox, metric, y0, y1, ticks, ref_v, thr_v, fmt, ylabel):
+    def panel(ox, metric, y0, y1, ticks, ref_v, thr_v, fmt, ylabel, x0=0, xstep=100_000, lr_pts=True, show_end=True):
         pw, ph, top = 430, 250, 50
         def sx(x):
-            return ox + 56 + (x / total) * (pw - 56 - 12)
+            return ox + 56 + ((x - x0) / (total - x0)) * (pw - 56 - 12)
         def sy(v):
             return top + (1 - (v - y0) / (y1 - y0)) * ph
         s = [f'<text x="{ox + 56}" y="{top - 24}" font-size="14" font-weight="600" fill="#1b1f24">{ylabel}</text>']
-        # pending region
-        s.append(f'<rect x="{sx(last)}" y="{top}" width="{sx(total) - sx(last)}" height="{ph}" fill="#eef0f3"/>')
-        s.append(f'<text x="{(sx(last) + sx(total)) / 2}" y="{top + ph * 0.62}" font-size="11" fill="#7a8290" text-anchor="middle">not yet scored (after {last // 1000}k)</text>')
+        # pending region (only while the run is unfinished)
+        if last < total:
+            s.append(f'<rect x="{sx(last)}" y="{top}" width="{sx(total) - sx(last)}" height="{ph}" fill="#eef0f3"/>')
+            s.append(f'<text x="{(sx(last) + sx(total)) / 2}" y="{top + ph * 0.62}" font-size="11" fill="#7a8290" text-anchor="middle">not yet scored (after {last // 1000}k)</text>')
         for t in ticks:
             s.append(f'<line x1="{ox + 56}" x2="{ox + pw - 12}" y1="{sy(t)}" y2="{sy(t)}" stroke="#d8dce2"/>')
             s.append(f'<text x="{ox + 50}" y="{sy(t) + 4}" font-size="11" fill="#4a5260" text-anchor="end">{fmt(t)}</text>')
-        for xv in range(0, total + 1, 100_000):
+        for xv in range(x0, total + 1, xstep):
             s.append(f'<line x1="{sx(xv)}" x2="{sx(xv)}" y1="{top + ph}" y2="{top + ph + 4}" stroke="#4a5260"/>')
             lab = "0" if xv == 0 else f"{xv // 1000}k"
             s.append(f'<text x="{sx(xv)}" y="{top + ph + 18}" font-size="11" fill="#4a5260" text-anchor="middle">{lab}</text>')
@@ -346,34 +349,44 @@ def chart_html():
         s.append(f'<line x1="{ox + 56}" x2="{ox + pw - 12}" y1="{sy(thr_v)}" y2="{sy(thr_v)}" stroke="#c92a2a" stroke-dasharray="2 3" stroke-width="1.5"/>')
         s.append(f'<text x="{ox + pw - 14}" y="{sy(thr_v) + 14}" font-size="11" fill="#c92a2a" text-anchor="end">pass threshold: {fmt(thr_v)}</text>')
         # LR test points
-        for lrv, col, lab in (("0.00002", "#2f9e44", "lr test 2e-5"), ("0.0002", "#d9480f", "lr test 2e-4")):
+        for lrv, col, lab in ((("0.00002", "#2f9e44", "lr test 2e-5"), ("0.0002", "#d9480f", "lr test 2e-4")) if lr_pts else ()):
             pts = [(int(r["ckpt"]), float(r[metric])) for r in lr if r["lr"] == lrv]
             for x, v in pts:
                 s.append(f'<circle cx="{sx(x)}" cy="{sy(v)}" r="4.5" fill="#fff" stroke="{col}" stroke-width="2"/>')
         # baseline
-        pts = [(int(r["ckpt"]), float(r[metric])) for r in base]
+        pts = [(int(r["ckpt"]), float(r[metric])) for r in base if int(r["ckpt"]) >= x0]
         path = " ".join(f"{'M' if i == 0 else 'L'}{sx(x):.1f},{sy(v):.1f}" for i, (x, v) in enumerate(pts))
         s.append(f'<path d="{path}" fill="none" stroke="#1f5fbf" stroke-width="2.5"/>')
         for x, v in pts:
             s.append(f'<circle cx="{sx(x)}" cy="{sy(v)}" r="4" fill="#1f5fbf"/>')
         x, v = pts[-1]
         s.append(f'<text x="{sx(x) - 6}" y="{sy(v) + 36}" font-size="11" fill="#1f5fbf" text-anchor="end">{fmt(v)} at {x // 1000}k</text>')
+        # full 3,501-image test set at the last step: the number that decides pass/fail
+        for r in full:
+            fx, fv = int(r["ckpt"]), float(r[metric])
+            s.append(f'<path d="M{sx(fx)},{sy(fv) - 7} L{sx(fx) + 7},{sy(fv)} L{sx(fx)},{sy(fv) + 7} L{sx(fx) - 7},{sy(fv)} Z" fill="#fff" stroke="#1f5fbf" stroke-width="2"/>')
         return "".join(s)
 
-    left = panel(0, "psnr", 10, 40, [10, 15, 20, 25, 30, 35, 40], ref_psnr, thr_psnr, lambda v: f"{v:.2f}" if isinstance(v, float) and v % 1 else f"{v:g}", "PSNR (dB), higher is better")
-    right = panel(500, "ssim", 0.3, 1.0, [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], ref_ssim, thr_ssim, lambda v: f"{v:.3f}" if abs(v * 100 - round(v * 100)) > 1e-9 or v in (ref_ssim, thr_ssim) else f"{v:.1f}", "SSIM, higher is better")
+    if zoom:
+        left = panel(0, "psnr", 36.0, 37.6, [36.0, 36.4, 36.8, 37.2, 37.6], ref_psnr, thr_psnr, lambda v: f"{v:.2f}", "PSNR (dB), steps 150k to 500k", x0=150_000, xstep=50_000, lr_pts=False)
+        right = panel(500, "ssim", 0.890, 0.920, [0.890, 0.895, 0.900, 0.905, 0.910, 0.915, 0.920], ref_ssim, thr_ssim, lambda v: f"{v:.3f}", "SSIM, steps 150k to 500k", x0=150_000, xstep=50_000, lr_pts=False)
+    else:
+        left = panel(0, "psnr", 10, 40, [10, 15, 20, 25, 30, 35, 40], ref_psnr, thr_psnr, lambda v: f"{v:.2f}" if isinstance(v, float) and v % 1 else f"{v:g}", "PSNR (dB), higher is better")
+        right = panel(500, "ssim", 0.3, 1.0, [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], ref_ssim, thr_ssim, lambda v: f"{v:.3f}" if abs(v * 100 - round(v * 100)) > 1e-9 or v in (ref_ssim, thr_ssim) else f"{v:.1f}", "SSIM, higher is better")
     legend = (
         '<g font-size="12" fill="#1b1f24">'
         '<line x1="30" x2="60" y1="378" y2="378" stroke="#1f5fbf" stroke-width="2.5"/><circle cx="45" cy="378" r="4" fill="#1f5fbf"/>'
         '<text x="68" y="382">baseline from scratch (batch 16, lr 2e-5), every 25k steps</text>'
+        + ('' if zoom else
         '<circle cx="470" cy="378" r="4.5" fill="#fff" stroke="#2f9e44" stroke-width="2"/><text x="482" y="382">10k-step test, lr 2e-5</text>'
-        '<circle cx="660" cy="378" r="4.5" fill="#fff" stroke="#d9480f" stroke-width="2"/><text x="672" y="382">10k-step test, lr 2e-4</text>'
-        '</g>'
+        '<circle cx="660" cy="378" r="4.5" fill="#fff" stroke="#d9480f" stroke-width="2"/><text x="672" y="382">10k-step test, lr 2e-4</text>')
+        + '<path d="M470,371 L477,378 L470,385 L463,378 Z" fill="#fff" stroke="#1f5fbf" stroke-width="2"/><text x="486" y="382">full 3,501-image test set</text>' * (1 if zoom else 0)
+        + '</g>'
     )
     svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="400" font-family="Helvetica,Arial,sans-serif">{left}{right}{legend}</svg>'
     page = f"""<!doctype html><html><head><meta charset="utf-8"><style>body{{margin:0;background:#fff}}
 .wrap{{width:1000px;padding:10px 20px 0 20px}}h1{{font:600 15px Helvetica,Arial,sans-serif;margin:6px 0 0 0;color:#1b1f24}}</style></head>
-<body><div class="wrap"><h1>Fast-DDPM LDFDCT denoising trained from scratch on Easley: quality on the 355-image test subset</h1>{svg}</div></body></html>"""
+<body><div class="wrap"><h1>Fast-DDPM LDFDCT denoising trained from scratch on Easley: quality on the 355-image test subset, and on the full set at 500k (diamond)</h1>{svg}</div></body></html>"""
     return page, 450
 
 
@@ -398,3 +411,5 @@ if __name__ == "__main__":
         render(name, page, h)
     page, h = chart_html()
     render("fig_psnr_vs_step", page, h)
+    page, h = chart_html(zoom=True)
+    render("fig_psnr_zoom", page, h)
