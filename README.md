@@ -46,7 +46,8 @@ H100, so this project uses PyTorch 2.2.2. Details and the dependency fixes this
 required are in the tutorial. Scheduler limits, storage layout and measured
 numbers are in [docs/easley_cluster_notes.md](docs/easley_cluster_notes.md). To
 choose how to run a given task and see what limits apply, start from
-[docs/run_options_and_bounds.md](docs/run_options_and_bounds.md).
+[docs/run_options_and_bounds.md](docs/run_options_and_bounds.md). The Phase 0 baseline table and what it implies for
+multi-GPU work are in [docs/phase0_findings.md](docs/phase0_findings.md).
 
 ## Status
 

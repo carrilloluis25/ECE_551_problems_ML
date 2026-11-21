@@ -67,7 +67,7 @@ You change **two lines**: the partition and the GPU request. Everything else sta
 | GPUs per node | 4 | 2 |
 | Cards you can get at once | 12 in `l40s` (more only through preemptible `scavenger`) | 8 in `h100` |
 | Training speed (this project) | 1x (about 15.7 images/s) | 2.5x to 2.9x (about 47 images/s) |
-| Largest fp32 training batch (this project) | **14** | above 32 (the paper's 16 fits) |
+| Largest fp32 training batch (this project) | **14** | **33** (the paper's 16 fits) |
 
 **Two ways to switch, with no difference in result:**
 
@@ -121,7 +121,7 @@ this cluster; **expected** = follows from the setup but not separately tried; **
 | Difference | L40S | H100 | Consequence |
 |---|---|---|---|
 | GPU memory | 44.4 GiB usable | 93.1 GiB usable | training batch 16 runs out of memory on the L40S (limit 14) and fits the H100 |
-| When a memory error shows | at step 2: step 1 fits, then Adam and EMA state is allocated | not seen up to batch 32 | a job can look healthy for a moment and then fail |
+| When a memory error shows | at step 2: step 1 fits, then Adam and EMA state is allocated | at step 2 for batch 34 and above (batch 33 runs but slowly, at the memory limit) | a job can look healthy for a moment and then fail |
 | Speed (fp32 training) | about 15.7 images/s | about 47 images/s (2.5x to 2.9x) | 500,000 steps at batch 16 is about 47.5 h on one H100 |
 | Throughput vs batch size | flat from batch 4 | flat from about batch 12 | a bigger batch does not make either card faster |
 | GPUs per node | 4 | 2 | a one-node multi-GPU job can use 4 L40S or 2 H100 |

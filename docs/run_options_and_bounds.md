@@ -57,8 +57,8 @@ How the job shapes differ (single job, array, dependency chain, multi-GPU): see
 | `scavenger` | 2 days, **preemptible**; adds the other L40S nodes (36 L40S in all) | confirmed | `sinfo` |
 | `general` | 2 days, **CPU only** | confirmed | `sinfo`, `scontrol show partition general` |
 | `extended` QOS | 5 days, but `cpu=1`, 1 job | confirmed | `sacctmgr show qos` |
-| Per-user CPU caps (QOS rows `easley-h1+`, `easley-l4+`, `easley-in+`, `easley-de+`, `easley-ge+`) | 64, 96, 64, 128 and 512 CPUs. The names are truncated, so the mapping to h100 / l40s / interactive / debug / general is **assumed**. A training job uses 8 CPUs, so this does not limit us | confirmed (numbers); assumed (names) | `sacctmgr show qos` |
-| **Per-user GPU cap** on `h100` / `l40s` | **unknown.** The `gres/...` part of those rows was cut off by column width | unverified | rerun with `MaxTRESPU%70` |
+| Per-user CPU caps | 64 (h100), 96 (l40s), 64 (interactive), 128 (debug), 512 (general). A training job uses 8 CPUs, so this does not limit us | confirmed (numbers); assumed (QOS-to-partition names) | `sacctmgr show qos` |
+| **Per-user GPU caps** | **`h100`: 2 GPUs. `l40s`: 3 GPUs. `interactive`: 1 GPU, 1 node. `debug`: 2 GPUs, 2 nodes. `scavenger`: none listed.** So one job can use at most 2 H100 or 3 L40S, and multi-GPU tests cannot run on `interactive` | confirmed 2026-11-21 (`MaxTRESPU`); QOS-to-partition link assumed by name | `sacctmgr show qos format=Name%22,MaxWall,MaxTRESPU%70,MaxJobsPU,GrpTRES%40 \| grep -iE "name\|easley"` |
 | GPU-hour allocation | No `GrpTRESMins`, `MaxTRESMins`, `MaxWall` or `MaxJobs` on the account's associations. A budget could still exist outside SLURM (a CARC portal) | partly checked | `sacctmgr show assoc user=$USER` |
 | Multi-node GPU jobs | allowed or not: **unknown** | unverified | ask the staff |
 | Hopper (A100) | Associations name `hopper-*`, `wheeler`, `xena`; login and job access **unverified** | unverified | see cluster notes section 6 |
@@ -77,7 +77,7 @@ Practical consequences:
 | GPU | Memory | Fp32 batch ceiling | Status |
 |---|---|---|---|
 | L40S | 44.4 GiB usable | **14** (16 runs out of memory at step 2) | confirmed |
-| H100 NVL | 95,830 MiB total, **93.1 GiB usable to PyTorch** (measured by `hello_torch.sh`) | above 32 (not found yet); batch 16 uses about 53 GB | confirmed |
+| H100 NVL | 95,830 MiB total, **93.1 GiB usable to PyTorch** (measured by `hello_torch.sh`) | **33** (34 and above run out of memory; 33 runs about 1.7x slower, at the memory limit); batch 16 uses about 53 GB | confirmed 2026-11-21 |
 
 Memory per image is about 3.1 to 3.2 GB plus about 2.7 GB fixed (**computed**).
 Inference batch: 16 on L40S (128 runs out of memory).
@@ -319,11 +319,10 @@ A crash costs at most the steps since the last checkpoint (up to 25,000, about
 
 | Item | How to settle it |
 |---|---|
-| Per-user GPU cap on `h100` and `l40s` | `sacctmgr show qos format=Name%22,MaxWall,MaxTRESPU%70,MaxJobsPU,GrpTRES%40 \| grep -iE "name\|easley"` |
 | Scratch purge policy; whether the 100 GiB group quota can be raised | CARC documentation or staff |
 | GPU-hour allocation outside SLURM | staff |
 | Multi-node GPU jobs allowed | staff; decides how far Phase 4 can go |
-| H100 batch ceiling above 32; `max_memory_allocated` | Phase 0 |
+| `max_memory_allocated`, parameter count, step-time split | Phase 0 (`phase0_profile.sh`, not yet run) |
 | Why `--export=ALL,VAR=...` makes H100 jobs fail env retrieval (a workaround exists; the cause on the node side is not known) | staff |
 | Hopper access | cluster notes section 6 |
 

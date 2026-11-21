@@ -83,12 +83,22 @@ was visible. A GPU-hour allocation could still be tracked elsewhere
 `sacctmgr show assoc user=$USER format=Account,Partition,QOS,GrpTRES,GrpTRESMins,MaxTRES,MaxTRESMins,MaxWall,MaxJobs`):
 - The account's associations show **no** `GrpTRESMins`, `MaxTRESMins`, `MaxWall` or `MaxJobs`
   (**confirmed**), so no GPU-hour cap is set in SLURM.
-- Per-user QOS CPU caps on the Easley QOS rows: `easley-h1+` 64, `easley-l4+` 96,
-  `easley-in+` 64, `easley-de+` 128, `easley-ge+` 512. The names are truncated, so the
-  mapping to h100 / l40s / interactive / debug / general is **assumed**.
-- The **GPU part** (`gres/...`) of the per-user limits was cut off by column width, so the
-  per-user GPU cap on `h100` and `l40s` is still **unverified**. Rerun:
-  `sacctmgr show qos format=Name%22,MaxWall,MaxTRESPU%70,MaxJobsPU,GrpTRES%40 | grep -iE "name|easley"`.
+- **Per-user GPU caps, confirmed 2026-11-21** (`sacctmgr show qos format=Name%22,MaxWall,MaxTRESPU%70,MaxJobsPU,GrpTRES%40 | grep -iE "name|easley"`).
+  The QOS names are matched to partitions by name, which is **assumed** (the partition-to-QOS
+  link was not printed):
+
+  | QOS | Per-user limits (`MaxTRESPU`) | Consequence |
+  |---|---|---|
+  | `easley-h100` | `cpu=64`, **`gres/gpu=2`**, `mem=1031578M` | At most **2 H100 at once**: one 2-GPU node, or 1 GPU on each of two nodes |
+  | `easley-l40s` | `cpu=96`, **`gres/gpu=3`**, `mem=171624M` | At most **3 L40S at once**, so a 4-GPU L40S node cannot be used whole |
+  | `easley-interactive` | `cpu=64`, **`gres/gpu=1`**, `mem=257434M`, `node=1` | **1 GPU**, 1 node: no multi-GPU tests here |
+  | `easley-debug` | `cpu=128`, `gres/gpu=2`, `mem=514868M`, `node=2` | 2 GPUs over up to 2 nodes (whether `debug` has GPU nodes is unchecked) |
+  | `easley-scavenger` | none listed | no per-user cap shown; jobs are preemptible |
+  | `easley-general` | `cpu=512`, `mem=2059472M` | CPU-only partition |
+  | `easley-bigmem` | `cpu=64`, `mem=2063765M` | not used here |
+
+  No node cap is listed for `h100` or `l40s`, so a 2-node job with one GPU per node is within these
+  limits (**untested**: other limits, such as the partition's own, are not shown here).
 - Other QOS rows seen: `large-alloc` (3 days, `cpu=1024`) and `extended` (5 days, `cpu=1`, 1 job).
 - `sshare -u $USER` is the correct form (`-u $lc2025` fails with an empty variable).
 
@@ -185,8 +195,14 @@ result files (the L40S table above is the saved original; files were later renam
 | 32 | 0.658 | 48.6 | 94,133 | |
 
 Findings:
-- **No out-of-memory up to batch 32.** The H100's ceiling is above 32 and still
-  unmeasured. The paper's batch of 16 fits with room to spare (about 53 GB).
+- **The H100 fp32 batch ceiling is 33 (measured 2026-11-21, array 1443167).** Batches up to 32 ran
+  normally. Batch 33 ran, but at 1.18 s/step (27.9 images/s) with 94,775 of 95,830 MiB in use, about
+  1.7x slower than the ~0.68 s/step expected from batch 32. A likely cause is the caching allocator
+  working at the memory limit (**unverified**; the Phase 0 profile reports `num_alloc_retries`), and
+  the node differed (easley053 vs easley052 for the others), which is not ruled out. Batch 34
+  failed with an out-of-memory error after 2 steps (step 1 fits, then the Adam and EMA state is
+  allocated, the same pattern as on the L40S); 36, 40 and 48 failed at once. So the usable range is
+  up to 32, and the paper's batch of 16 uses about half of it (about 53 GB).
 - **The cards have more than 80 GB.** `nvidia-smi` reported 94,133 MiB in use at batch 32.
   **Confirmed 2026-11-09:** the cards are **H100 NVL** with 95,830 MiB total (93.1 GiB usable
   to PyTorch), measured by `slurm/hello_gpu.sh` and `slurm/hello_torch.sh`. An earlier note
@@ -242,7 +258,7 @@ If it does, Hopper's A100s (80 GB) would fit the paper's batch size of 16.
 ## 8. Questions for the cluster staff
 
 - Do I have access to Hopper, and how do I log in?
-- Per-user GPU limits and any GPU-hour allocation for my account?
+- Any GPU-hour allocation for my account? (The per-user caps are known: 2 H100, 3 L40S, 1 on `interactive`. Can they be raised for a scaling study?)
 - What are the per-user limits on the `h100` and `l40s` partitions, and can I run multi-node jobs there?
 - Scratch purge policy? Can the 100 GiB group quota (hit on 2026-11-10) be raised for a 500,000-step run?
 - Gres name for the H100 cards? (`gpu:h100` worked in job scripts; `nvidia-smi` reports "NVIDIA H100 NVL".)
