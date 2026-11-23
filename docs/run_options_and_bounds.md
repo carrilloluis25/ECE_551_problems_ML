@@ -26,7 +26,7 @@ Recorded 2026-11-03. Statuses: **confirmed** (seen in a log or command output),
 | Sweep many configs (step count, scheduler, ...) | Job array | `l40s` or `h100`; concurrency = free GPUs | tutorial section 8 |
 | Train on several GPUs at once | One job, `--gres=gpu:<type>:N`, `torchrun` | One node: 2 H100 or 3 L40S (the per-user caps; an L40S node has 4 cards) | Phase 3: **not built yet** (needs DDP) |
 | Train across nodes | `--nodes=2` + `srun torchrun` | multi-node permission **unverified** | Phase 4: **not built yet** |
-| View images | Colab, or the notebook on Easley JupyterHub (needs a hub profile **with a GPU**) | 1 GPU | `notebooks/fast_ddpm_viewer.ipynb`; setup in [jupyter_notebooks.md](jupyter_notebooks.md) |
+| View images | Colab, or the notebook on Easley JupyterHub (needs a hub profile **with a GPU**) | 1 GPU | `notebooks/fast_ddpm_viewer.ipynb`; setup in [easley_pytorch_setup.txt](easley_pytorch_setup.txt) |
 
 Never submitted a job? Start with [slurm_first_script.md](slurm_first_script.md).
 

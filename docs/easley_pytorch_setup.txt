@@ -1,0 +1,225 @@
+SETTING UP PYTORCH WITH GPU ON EASLEY, AND RUNNING THE FAST-DDPM NOTEBOOKS
+==========================================================================
+
+Status tags: [ran] seen working in this project, [tested on CPU] the logic was run on a CPU with a tiny
+model only, [unverified] not run yet.
+
+Contents
+  PART A. A PyTorch kernel for Jupyter (the generic recipe)
+  PART B. The Fast-DDPM environment as a kernel
+  PART C. Starting a JupyterHub server that has a GPU
+  PART D. The Fast-DDPM notebooks (Colab and the hub)
+  PART E. Making a sample of image pairs
+  COMMON MISTAKES
+
+
+PART A. A PYTORCH KERNEL FOR JUPYTER (the generic recipe)
+---------------------------------------------------------
+A notebook runs in whatever Python its "kernel" points at. The hub's default kernel has no PyTorch, so
+each conda environment you want to use in a notebook is registered as its own kernel.
+
+1. Create and activate the environment (on the login node)
+
+   conda create -n torch_0 python=3.11 -y
+   conda activate torch_0
+
+2. Install PyTorch with CUDA
+
+   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+3. Install ipykernel and register the environment with Jupyter
+
+   conda install conda-forge::ipykernel -y
+   python -m ipykernel install --user --name torch_0 --display-name "Python (torch_0)"
+
+4. Request a GPU node
+
+   srun --partition=interactive --gres=gpu:1 --time=00:15:00 --pty bash
+
+5. Test the setup (on the GPU node)
+
+   conda activate torch_0
+   python -c "import torch; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+
+   Expected output: 2.5.1+cu121 True NVIDIA L40S
+
+6. Release the GPU when done
+
+   exit
+
+7. Use the environment in the Jupyter portal: start a server with a GPU (PART C), open a notebook and
+   select the kernel "Python (torch_0)" (Kernel > Change Kernel if a notebook is already open).
+   Check the GPU in a notebook cell:
+
+      import torch
+      print(torch.cuda.is_available(), torch.cuda.get_device_name(0))
+
+   When finished, stop the server (File > Hub Control Panel > Stop My Server) so the GPU is released.
+
+
+PART B. THE FAST-DDPM ENVIRONMENT AS A KERNEL
+---------------------------------------------
+For this project use the "fastddpm" conda environment instead of torch_0: it was built to run the Fast-DDPM
+code (Python 3.10, torch 2.2.2+cu121 [ran]), so the notebooks import exactly what training used.
+
+1. Register it (on the login node, once)
+
+   conda activate fastddpm
+   conda install conda-forge::ipykernel -y
+   python -m ipykernel install --user --name fastddpm --display-name "Python (fastddpm)"
+
+2. Check that it has the packages the notebooks import. The environment was built for training, so pandas
+   or matplotlib may be missing; install any missing one with: pip install <name>
+
+   python -c "import torch, yaml, skimage, matplotlib, pandas, PIL; print(torch.__version__)"
+
+3. In a notebook, choose Kernel > Change Kernel > "Python (fastddpm)".
+
+
+PART C. STARTING A JUPYTERHUB SERVER THAT HAS A GPU
+---------------------------------------------------
+1. Open https://easley.alliance.unm.edu/jupyter/hub/spawn and sign in with your Easley (CARC) username
+   and password.
+
+2. The page asks you to "Select a job profile" from a dropdown. THE FIRST ENTRY, THE DEFAULT, HAS NO GPU.
+
+   Profile                                              GPU      Use it for
+   ---------------------------------------------------  -------  ---------------------------------------
+   1 hour, 1 core, 4GB RAM (default)                    none     editing files only; notebooks will fail
+   4 hours, 32 cores, 120GB RAM                         none
+   4 hours, 64 cores, 235GB RAM                         none
+   8 hours, 16 cores, 55GB RAM, 1 L40s GPU              1 L40S   the viewer notebook
+   8 hours, 48 cores, 165GB RAM, 3 L40s GPU             3 L40S   the parallel-inference notebook
+   8 hours, 32 cores, 500GB RAM, 1 H100 GPU             1 H100   the viewer, faster
+   8 hours, 32 cores, 950GB RAM                         none
+
+   There is no profile with 2 H100. The 3-L40S profile uses your whole L40S allowance (3 GPUs, the
+   per-user cap) for up to 8 hours, and other L40S jobs of yours wait while it runs. It may also queue
+   for a while before it starts.
+
+3. Click Start and wait for the session (it may sit in the queue for a bit).
+
+4. Check that the server really has a GPU. Run this in the first cell of a notebook:
+
+      import os, subprocess, sys, torch
+      print("python      :", sys.executable)
+      print("torch       :", torch.__version__, "| built for CUDA:", torch.version.cuda)
+      print("cuda found  :", torch.cuda.is_available(), "| devices:", torch.cuda.device_count())
+      print("CUDA_VISIBLE_DEVICES:", os.environ.get("CUDA_VISIBLE_DEVICES"))
+      print("host        :", os.uname().nodename)
+      print(subprocess.run(["nvidia-smi", "-L"], capture_output=True, text=True))
+
+   A working result [ran] lists a GPU and "cuda found: True", for example "GPU 0: NVIDIA L40S" on
+   easley057. From a terminal you can also see what the server requested:
+
+      squeue --me -o "%.10i %.12P %.20j %.10b %.8T %N"
+
+   The %b column should show a GPU (like gres:gpu:1).
+
+5. When finished, stop the server: File > Hub Control Panel > Stop My Server. A server holds its GPUs
+   until it ends, so leaving it running can make your other jobs wait.
+
+
+PART D. THE FAST-DDPM NOTEBOOKS (COLAB AND THE HUB)
+---------------------------------------------------
+Two notebooks are in the repo's notebooks/ folder.
+
+  fast_ddpm_viewer.ipynb [ran on Colab (T4) and on the hub (1 L40S)]
+    Runs the pretrained model (the authors' LDFDCT checkpoint, EMA weights, 10-step DDIM) on a few
+    low-dose CT slices and shows: input | generated | ground truth | error, with PSNR and SSIM per
+    image. It handles about 8 images, not the 3,501-image test set; it measures no speed; it only knows
+    this one task (single-channel low-dose to full-dose CT, 256 x 256 grayscale); it never trains.
+
+  fast_ddpm_parallel_inference.ipynb [tested on CPU; unverified on a GPU]
+    Extends it to several GPUs: throughput by batch size, time and quality at 10, 5 and 2 sampling steps,
+    one batch split across GPUs by hand, test-set sharding with a check that the merged result equals the
+    one-GPU result, and charts of the cluster's scale_result_*.txt files (from slurm/scaling_bench.sh).
+
+Which images: any NAME_ld.png (low dose) with an optional NAME_fd.png (full dose) partner. Slices from the
+TEST folder (LD_FD_CT_test) show how the model does on unseen patients. Slices from the TRAINING folder
+(LD_FD_CT_train) flatter it, because the model saw them while learning. Without a _fd file you get an
+output but no score or error map. The images are the authors' processed dataset (the Google Drive bundle
+named in the Fast-DDPM README). They are not in the git repository; check the dataset's usage terms
+before sharing them publicly.
+
+Option 1: Google Colab
+  a. Open the notebook with the "Open in Colab" badge at its top on GitHub, or upload the .ipynb
+     (File > Upload notebook). If the repository is private, Colab asks you to authorize GitHub.
+  b. Runtime > Change runtime type > T4 GPU.
+  c. Run the cells in order. The first cell clones the Fast-DDPM code and downloads the pretrained
+     checkpoint from Hugging Face (about 1.7 GB, a few minutes the first time).
+  d. When the upload cell asks, upload a .zip of _ld.png / _fd.png pairs (PART E).
+  e. A free Colab runtime has ONE GPU, so the parallel notebook's multi-GPU sections run their pieces one
+     after another there: that checks the splitting and merging are correct, but the wall-clock time does
+     not shrink. Real multi-GPU timings come from Easley.
+
+Option 2: Easley JupyterHub
+  a. Register the kernel (PART B) and start a server with a GPU (PART C).
+  b. Get the notebook onto Easley: "git pull" in ~/ECE_551_problems_ML (it only brings in COMMITTED
+     files), or use the hub file browser's Upload button.
+  c. Open it and choose the kernel "Python (fastddpm)".
+  d. In the first cell set CKPT to a checkpoint that exists. The default
+     (~/carc-scratch/fastddpm-exp/logs/ldfdct_smoke_test/ckpt_1.pth) stops the cell with an assertion
+     error if the file is missing. Any ckpt_<step>.pth from one of your runs works, which shows what
+     YOUR model produces.
+  e. In the viewer, INPUT_DIR already points at the LDFDCT test folder on Easley, so nothing needs
+     uploading; it takes 8 slices spread across the folder.
+  f. Use the 3-L40S profile for the parallel notebook, so its multi-GPU sections run on 3 cards at the
+     same time (it then also runs a 3-shard case).
+
+
+PART E. MAKING A SAMPLE OF IMAGE PAIRS (for Colab)
+--------------------------------------------------
+On Easley, this picks 8 pairs spread across the test set. Swap LD_FD_CT_test for LD_FD_CT_train to sample
+training slices.
+
+   cd ~/carc-scratch/fastddpm-data/data/LD_FD_CT_test
+   find . -name "*_ld.png" | sort | awk 'NR%400==1' | head -8 | while read f; do echo "$f"; echo "${f%_ld.png}_fd.png"; done | zip ~/sample_pairs.zip -@
+
+Then copy it to your computer (run this on your own machine):
+
+   scp lc2025@easley.alliance.unm.edu:~/sample_pairs.zip .
+
+
+COMMON MISTAKES
+---------------
+- cuda.is_available() prints False:
+  You are on the login node. Test on a GPU node (PART A, step 4).
+
+- "AssertionError: No GPU" from the notebook's first cell, but "import torch" worked:
+  The server was started on the default profile (1 core, 4GB, no GPU). The diagnostic cell showed host
+  easley001, "nvidia-smi ... couldn't communicate with the NVIDIA driver" and CUDA_VISIBLE_DEVICES None.
+  The kernel and the environment were fine. Stop the server and start a new one on a profile that lists
+  a GPU (PART C). The host then becomes a GPU node and "nvidia-smi -L" lists a GPU.
+
+- cuda.is_available() prints False in Jupyter, but True in a job:
+  The server was started without a GPU. Same fix as above.
+
+- The notebook runs, but PSNR and SSIM are NOT printed above the "generated" panel, and the "generated"
+  titles sit higher than the others:
+  The old code put the scores in the panel's axis label, and axis("off") hides axis labels. Edit the
+  HELPER cell (the one that defines show, "# 3. Helpers: run the model, score, and display"): replace
+  the set_xlabel(...) and set_label_position("top") lines with
+
+      axes[r][1].set_title(f"generated\nPSNR {psnr(out, gt):.2f} dB   SSIM {ssim(gt, out, data_range=1.0):.4f}", fontsize=10)
+
+  Run that cell FIRST, then the cell that displays the images: rerunning only the display cell keeps
+  the old show in memory.
+
+- "Python (fastddpm)" or "Python (torch_0)" is missing from the kernel list:
+  Run the ipykernel install command (PART A step 3 / PART B step 1) with that environment activated,
+  then refresh Jupyter.
+
+- An assertion error that names CKPT:
+  The default checkpoint file does not exist on your account. Set CKPT to a real ckpt_<step>.pth.
+
+- Other jobs of yours wait while the hub is open:
+  The server holds its GPUs for up to 8 hours and the per-user caps count them. Stop the server when you
+  are finished.
+
+- "Could not solve for environment specs":
+  Do not use pytorch-cuda=3.9. That number is the CUDA version, not the Python version. Use the pip
+  command in PART A step 2 instead.
+
+- Always pin the Python version (python=3.11). Otherwise conda installs the newest Python, which PyTorch
+  may not support yet.

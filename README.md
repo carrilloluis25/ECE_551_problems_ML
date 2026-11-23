@@ -49,7 +49,8 @@ choose how to run a given task and see what limits apply, start from
 multi-GPU work are in [docs/phase0_findings.md](docs/phase0_findings.md). How the code uses several GPUs today
 (`DataParallel`) and what DDP with `torchrun` would add is in
 [docs/multi_gpu_background.md](docs/multi_gpu_background.md). Looking at the model's output in a notebook, on Colab or
-Easley JupyterHub (kernel setup, server profiles, troubleshooting), is in [docs/jupyter_notebooks.md](docs/jupyter_notebooks.md).
+Easley JupyterHub (kernel setup, server profiles, troubleshooting), is in [docs/jupyter_notebooks.md](docs/jupyter_notebooks.md) and, with the generic kernel recipe,
+[docs/easley_pytorch_setup.txt](docs/easley_pytorch_setup.txt).
 
 ## Status
 
@@ -96,6 +97,7 @@ ECE_551_problems_ML/
 │   ├── run_options_and_bounds.md # how to run each kind of task, limits, results so far, baseline plan
 │   ├── multi_gpu_background.md # DataParallel today vs DDP/torchrun: how each works, what DDP adds
 │   ├── jupyter_notebooks.md    # the notebooks on Colab and Easley JupyterHub: kernel setup, GPU profiles, problems
+│   ├── easley_pytorch_setup.txt # Jupyter kernels (torch_0, fastddpm), hub GPU profiles, the Colab/hub notebooks, problems
 │   ├── images/                 # expected-output screenshots and result figures used in the docs
 │   ├── images_src/build_images.py # regenerates them (stdlib + headless Chrome) from real output text and docs/results/
 │   ├── results/                # evaluation CSVs copied from the cluster (feed the PSNR/SSIM figure)
