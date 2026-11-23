@@ -46,7 +46,9 @@ required are in the tutorial. Scheduler limits, storage layout and measured
 numbers are in [docs/easley_cluster_notes.md](docs/easley_cluster_notes.md). To
 choose how to run a given task and see what limits apply, start from
 [docs/run_options_and_bounds.md](docs/run_options_and_bounds.md). The Phase 0 baseline table and what it implies for
-multi-GPU work are in [docs/phase0_findings.md](docs/phase0_findings.md).
+multi-GPU work are in [docs/phase0_findings.md](docs/phase0_findings.md). How the code uses several GPUs today
+(`DataParallel`) and what DDP with `torchrun` would add is in
+[docs/multi_gpu_background.md](docs/multi_gpu_background.md).
 
 ## Status
 
@@ -91,6 +93,7 @@ ECE_551_problems_ML/
 │   ├── easley_cluster_notes.md # partitions, QOS limits, storage, measured numbers
 │   ├── slurm_first_script.md   # your first SLURM script, for an L40S or an H100
 │   ├── run_options_and_bounds.md # how to run each kind of task, limits, results so far, baseline plan
+│   ├── multi_gpu_background.md # DataParallel today vs DDP/torchrun: how each works, what DDP adds
 │   ├── images/                 # expected-output screenshots and result figures used in the docs
 │   ├── images_src/build_images.py # regenerates them (stdlib + headless Chrome) from real output text and docs/results/
 │   ├── results/                # evaluation CSVs copied from the cluster (feed the PSNR/SSIM figure)

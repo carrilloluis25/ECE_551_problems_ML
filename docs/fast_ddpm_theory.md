@@ -37,11 +37,33 @@ discriminator, and is less sensitive to hyperparameters. [paper, Discussion C]
 
 ## 2. Diffusion models from first principles
 
+**Symbols used in this section** (each is defined again where it first appears):
+
+| Symbol | Meaning |
+|---|---|
+| $x_0$ | the clean target image (here: the full-dose CT slice) |
+| $c$ | the condition image (here: the low-dose CT slice the model is given) |
+| $T$ | total number of noising steps in the full chain (1000) |
+| $t$ | a time step, an integer from 1 to $T$; $t'$ is the next (earlier) step chosen when sampling |
+| $x_t$ | the image after $t$ noising steps (clean at $t=0$, almost pure noise at $t=T$) |
+| $\beta_t$ | the variance of the noise added at step $t$ (the *noise schedule*, 0.0001 up to 0.02) |
+| $\alpha_t$, $\bar\alpha_t$ | $\alpha_t = 1-\beta_t$ is the fraction of signal kept at one step; $\bar\alpha_t$ is the product of $\alpha_s$ for $s=1..t$, the fraction kept after $t$ steps |
+| $\epsilon$ | a noise image: every pixel drawn independently from a standard normal distribution |
+| $\epsilon_\theta$ | the U-Net's prediction of $\epsilon$; $\theta$ stands for all of its weights (113,669,761 numbers) |
+| $\mathcal{N}(\mu, \Sigma)$ | the Gaussian (normal) distribution with mean $\mu$ and covariance $\Sigma$ |
+| $I$ | the identity matrix, so $\beta_t I$ means "independent noise of variance $\beta_t$ on every pixel" |
+| $\sim$ | "is drawn from", e.g. $\epsilon \sim \mathcal{N}(0, I)$ |
+| $\mathbb{E}$ | the average over the random choices written under it (time step, image pair, noise) |
+| $\lVert\cdot\rVert^2$ | the sum of squared differences over all pixels |
+| $\alpha(t)$, $\sigma(t)$ | the paper's continuous-time versions: $\alpha^2(t)$ plays the role of $\bar\alpha_t$ and $\sigma^2(t) = 1-\alpha^2(t)$ is the noise share |
+| $\hat{x}_0$ | the model's current estimate of the clean image (used in sampling) |
+| $\eta$, $\sigma$, $z$ | sampling controls: $\eta$ sets how random the sampler is, $\sigma$ is the amount of fresh noise added per step (this $\sigma$ is not the $\sigma(t)$ above), $z\sim\mathcal{N}(0,I)$ is that fresh noise |
+
 ### 2.1 Forward process: destroy the image with noise
 Start with a clean target $x_0$. Define a ladder of noisy versions
 $x_1, \dots, x_T$ where each is the previous one plus a little Gaussian noise:
 
-$$q(x_t \mid x_{t-1}) = \mathcal{N}\!\left(\sqrt{1-\beta_t}\,x_{t-1},\; \beta_t I\right)$$
+$$q(x_t \mid x_{t-1}) = \mathcal{N}\left(\sqrt{1-\beta_t}\,x_{t-1},\; \beta_t I\right)$$
 
 $\beta_t$ is the *noise schedule*. Fast-DDPM uses the standard linear schedule:
 $\beta_t$ rises linearly from $10^{-4}$ to $0.02$ over $T=1000$ steps. [paper, code]
@@ -49,7 +71,7 @@ $\beta_t$ rises linearly from $10^{-4}$ to $0.02$ over $T=1000$ steps. [paper, c
 Because each step is Gaussian, the whole chain collapses into a single
 closed-form jump from $x_0$ to any $x_t$. [background]
 
-$$q(x_t \mid x_0) = \mathcal{N}\!\left(\sqrt{\bar\alpha_t}\,x_0,\; (1-\bar\alpha_t) I\right),
+$$q(x_t \mid x_0) = \mathcal{N}\left(\sqrt{\bar\alpha_t}\,x_0,\; (1-\bar\alpha_t) I\right),
 \qquad \bar\alpha_t = \prod_{s=1}^{t}(1-\beta_s)$$
 
 Equivalently, with $\epsilon \sim \mathcal{N}(0, I)$:
@@ -80,7 +102,7 @@ Sample a data pair $(x_0, c)$, a time step $t$, and noise $\epsilon$. Build $x_t
 with the closed form above. Ask the network to recover $\epsilon$:
 
 $$\mathcal{L}(\theta) = \mathbb{E}_{t,(x_0,c),\epsilon}\;
-\big\|\epsilon - \epsilon_\theta\!\big(\alpha(t)x_0+\sigma(t)\epsilon,\; c,\; t\big)\big\|^2
+\big\|\epsilon - \epsilon_\theta\big(\alpha(t)x_0+\sigma(t)\epsilon,\; c,\; t\big)\big\|^2
 \quad \text{(paper Eq. 9)}$$
 
 Plain mean-squared error, with equal weight on every $t$. Training is regression,
@@ -289,7 +311,7 @@ the current $t$.
 ### Metrics
 **PSNR** (peak signal-to-noise ratio), in decibels, higher is better:
 
-$$\mathrm{PSNR} = 20\log_{10}\!\left(\frac{\mathrm{MAX}_I}{\sqrt{\mathrm{MSE}}}\right)$$
+$$\mathrm{PSNR} = 20\log_{10}\left(\frac{\mathrm{MAX}_I}{\sqrt{\mathrm{MSE}}}\right)$$
 
 It is a log-scaled pixel-error measure.
 [paper Eq. 10]
