@@ -197,9 +197,11 @@ result files (the L40S table above is the saved original; files were later renam
 Findings:
 - **The H100 fp32 batch ceiling is 33 (measured 2026-11-21, array 1443167).** Batches up to 32 ran
   normally. Batch 33 ran, but at 1.18 s/step (27.9 images/s) with 94,775 of 95,830 MiB in use, about
-  1.7x slower than the ~0.68 s/step expected from batch 32. A likely cause is the caching allocator
-  working at the memory limit (**unverified**; the Phase 0 profile reports `num_alloc_retries`), and
-  the node differed (easley053 vs easley052 for the others), which is not ruled out. Batch 34
+  1.7x slower than the ~0.68 s/step expected from batch 32. The Phase 0 profile at batch 33 (job
+  1445727) showed 7 allocator retries (0 at batch 16), 91.8 GiB reserved, and a backward pass 1.8x slower
+  than linear scaling while the forward pass was normal; a likely cause is cuDNN being forced to slower,
+  low-workspace convolution-backward algorithms (**unverified**). The node is not the cause: batch-16
+  profile runs on three nodes agreed within 0.7%. Batch 34
   failed with an out-of-memory error after 2 steps (step 1 fits, then the Adam and EMA state is
   allocated, the same pattern as on the L40S); 36, 40 and 48 failed at once. So the usable range is
   up to 32, and the paper's batch of 16 uses about half of it (about 53 GB).

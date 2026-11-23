@@ -17,7 +17,7 @@ wrong along the way, and what is still open. Every number says whether it was **
 | Training speed at batch 8 | 0.507 s/step, 15.7 images/s | 0.182 s/step, 44.0 images/s |
 | Training speed at batch 16 (the paper's) | does not fit | 0.342 s/step, 46.8 images/s |
 | Throughput vs batch size | flat at ~15.6 images/s from batch 4 | flat at ~47 images/s from batch ~12 |
-| Memory per image | ~3.2 GB (+2.7 GB fixed) | ~3.1 GB (from `nvidia-smi`; see the memory note in section 5) |
+| Memory per image | ~3.2 GB (+2.7 GB fixed), from `nvidia-smi` | ~3.1 GB from `nvidia-smi` (includes allocator cache); **2.6 GiB steady state** from the profiler (section 4) |
 | Inference (10 steps, batch 16) | ~3.6 s per batch; 3,501 images in 16.6 min | not measured |
 | **Where a step goes** (profile, batch 16) | not profiled | backward 65%, forward 30%, EMA 3%, optimizer 1.5%, data wait 0% |
 | Parameters | 113,669,761 (same model) | 113,669,761 |
@@ -125,17 +125,47 @@ What this means:
 5. **The data loader is not a limit** for one GPU, and can feed about 3 GPUs' worth of images per
    second from 8 workers. Under DDP each process has its own loader (8 workers each).
 
-**Memory: an unresolved discrepancy.** PyTorch reported a peak of 58.3 GiB allocated (60.4 GiB reserved)
-at batch 16, while `nvidia-smi` read about 51.5 GiB (52,755 MiB) in this job and in the batch-size test.
-Batch 33 also runs on a card with 93 GiB, which linear growth from 58.3 GiB at batch 16 would not allow.
-A hypothesis (**unverified**): with `cudnn.benchmark = True`, cuDNN tries algorithms with large temporary
-workspaces when memory is plentiful, which inflates the peak during the first steps. The profiler now
-reports the first-steps peak and the steady-state peak separately. Until that is rerun, quote 58.3 GiB as
-"peak during the first steps", not as the memory a step needs.
+**Node variation: negligible.** Three batch-16 profile runs on different nodes gave 0.3376, 0.3388 and
+0.3399 s/step (a 0.7% spread), with the same phase split (backward 65.2 to 65.3%, forward 30.0%) and 99%
+GPU utilization (**measured**).
+
+**Memory (batch 16, measured with the updated profiler, 2026-11-22):**
+
+| | MiB | GiB |
+|---|---:|---:|
+| Peak allocated during the first 15 steps | 59,661 | 58.3 |
+| **Peak allocated in steady state (after warm-up)** | **45,129** | **44.1** |
+| Peak reserved by the allocator since warm-up | 51,836 | 50.6 |
+| Allocated at the end of a step (weights + Adam + EMA + one batch) | 2,283 | 2.2 |
+
+The first steps peak **14.5 GiB above steady state**, which fits `cudnn.benchmark = True` trying
+workspace-hungry algorithms and then releasing them. `nvidia-smi` agrees once this is accounted for: its
+usual 52,755 MiB is the allocator's reserved 51,836 MiB plus about 0.9 GiB of CUDA context, and the odd
+57,991 MiB reading in one job was the short-lived peak caught by the 1-second sampler. The steady-state
+memory per image is about **2.6 GiB** ((45,129 - 2,283) / 16 MiB, **computed** and assuming linear
+scaling), lower than the ~3.1 GB per image from `nvidia-smi`, which includes the allocator's cache.
+The weights, Adam state and EMA take only 1.7 GiB of the 44.1 GiB; the rest is activations and
+temporary workspaces.
+
+**Batch 33 on the same profiler (job 1445727).** It is the same model at the card's edge:
+
+| | Batch 16 | Batch 33 | If it scaled linearly |
+|---|---:|---:|---:|
+| Natural step | 0.339 s | **1.064 s** (31.0 images/s) | ~0.70 s |
+| Forward + loss | 104 ms | 222 ms | 214 ms |
+| Backward | 226 ms | **837 ms** | 466 ms |
+| Allocator retries | 0 | **7** | |
+| Peak allocated / reserved | 58.3 / 60.4 GiB | 89.4 / 91.8 GiB | |
+
+The slowdown is entirely in the backward pass (1.8x slower than linear scaling would give), while the
+forward pass scales normally (1.04x). A likely cause (**unverified**): at the memory limit cuDNN can only
+use convolution-backward algorithms with small temporary workspaces, which are slower. Retries alone (7
+over the whole run) cannot explain a slowdown at every step. Treat batch 32 as the practical maximum:
+batch 33 runs, but at 31 images/s it is slower per image than batch 16 (47 images/s).
 
 ## 5. Still open in Phase 0
 
-- Rerun the profile with the steady-state memory split, and at batch 33 (`BATCH=33 sbatch phase0_profile.sh`),
-  to test the allocator explanation for the slow batch 33 (the retry count at the edge).
-- Compare the second job's numbers (1445700, easley054) with the first (easley053) for node-to-node variation.
-- Nothing else: the parameter count, step-time split, loader speed, utilization and clipping are done.
+- Optional: test the cuDNN-algorithm explanation for the slow backward pass at batch 33 (for example with
+  `torch.backends.cudnn.benchmark = False`, or by logging the chosen algorithms). It does not affect the plan.
+- Done: parameter count, step-time split, loader speed, utilization, gradient clipping, node variation,
+  steady-state memory, and the batch-33 behaviour. **Phase 0 is complete.**
