@@ -17,12 +17,14 @@ wrong along the way, and what is still open. Every number says whether it was **
 | Training speed at batch 8 | 0.507 s/step, 15.7 images/s | 0.182 s/step, 44.0 images/s |
 | Training speed at batch 16 (the paper's) | does not fit | 0.342 s/step, 46.8 images/s |
 | Throughput vs batch size | flat at ~15.6 images/s from batch 4 | flat at ~47 images/s from batch ~12 |
-| Memory per image | ~3.2 GB (+2.7 GB fixed) | ~3.1 GB |
+| Memory per image | ~3.2 GB (+2.7 GB fixed) | ~3.1 GB (from `nvidia-smi`; see the memory note in section 5) |
 | Inference (10 steps, batch 16) | ~3.6 s per batch; 3,501 images in 16.6 min | not measured |
+| **Where a step goes** (profile, batch 16) | not profiled | backward 65%, forward 30%, EMA 3%, optimizer 1.5%, data wait 0% |
+| Parameters | 113,669,761 (same model) | 113,669,761 |
 | GPUs per node | 4 | 2 |
 | **Per-user cap** | **3** (`l40s`), **1** (`interactive`) | **2** (`h100`) |
 
-(all **measured**, except "memory per image", which is **computed** from the batch-size tables)
+(all **measured**, except "memory per image", which is **computed** from the batch-size tables; the profile rows are from section 4)
 
 The from-scratch baseline (batch 16, lr 2e-5, 500,000 steps, one H100): **37.457 dB / 0.9155 on the full
 test set** (the authors' checkpoint: 37.457 / 0.9155; paper 37.46 / 0.9155). It took about **48.6
@@ -49,11 +51,13 @@ H100-hours** at 0.345 to 0.359 s/step (**measured**, from `sacct`). Checkpoints 
 5. **The "10-minute smoke test" is a time limit, not a workload.** `ldfd_train_smoke.yml` sets no
    step cap, so the job trains until `--time=00:10:00` ends it. Speed comparisons need a fixed number
    of steps (`--max_steps`), as `scaling_bench.sh` does.
-6. **What the training loop does** (read from `sg_train`, **not yet profiled**):
+6. **What the training loop does** (read from `sg_train`; the profile confirmed the first two points):
    - it already wraps the model in `DataParallel`, so a job given 2 GPUs uses both with no code change;
-   - `loss.item()` (in the log line) and `tb_logger.add_scalar` force a GPU sync every step;
-   - gradient clipping is inside `try/except: pass` and the config has no `grad_clip` key, so it is
-     probably skipped (the profile checks this);
+   - `loss.item()` (in the log line) and `tb_logger.add_scalar` force a GPU sync every step, which
+     costs under about 2% of a step (GPU kernel time is ~0.331 s of a 0.338 s step; **measured**);
+   - **gradient clipping is never applied**: it ran 0 times and was silently skipped on all 75 measured
+     steps, because the config has no `grad_clip` key. The baseline config was derived from this file,
+     so the model that matched the paper trained without clipping (**measured**);
    - every process would get the same seed under DDP, so the ranks would draw identical noise and
      timesteps: each rank needs its own seed;
    - `main` catches exceptions and returns exit code 0, so a crash looks like a clean finish.
@@ -76,18 +80,62 @@ H100-hours** at 0.345 to 0.359 s/step (**measured**, from `sacct`). Checkpoints 
 | A job's exit code shows success | the fork's `main` returns 0 after a crash | the quota failure |
 | 4 L40S in one job is possible | the cap is 3 (1 on `interactive`) | `sacctmgr` |
 
-## 4. Still open in Phase 0
+## 4. Profile results (2026-11-22, H100, batch 16, job 1445699)
 
-`slurm/phase0_profile.sh` (not yet run) measures, in one H100 job of a few minutes:
+`slurm/phase0_profile.sh`, one H100 (**measured**; the 5-step `torch.profiler` pass adds its own overhead).
 
-| Item | Why it matters |
+| Measurement | Result |
 |---|---|
-| Parameter count (total and per block) | confirms the ~116M figure derived from the checkpoint size, and sizes the gradient all-reduce |
-| True peak memory (`max_memory_allocated`) | replaces the `nvidia-smi` readings, which overstate and are not monotonic |
-| Time per phase of a step (data wait, host-to-device, forward, backward, clip, optimizer, EMA, logging) | decides which speedups are worth building |
-| Data-loader speed alone | whether 8 workers can feed 1, 2 or 3 GPUs |
-| `torch.profiler` top operations | where the GPU and the Python overhead go |
-| GPU utilization | whether the GPU is waiting |
-| Allocator retries at batch 16 and 33 | tests the explanation for the slow batch 33 |
+| Parameters | **113,669,761** (up path 62.5%, down 27.5%, mid 9.7%); gradients 455 MB in fp32 |
+| Checkpoint size implied by 4 fp32 copies | 1.694 GiB (the files are 1.736 GiB) |
+| Natural step | **0.3376 s = 47.4 images/s** (the baseline run: 0.345 s with logging and snapshots) |
+| Time waiting for data | 0.1 ms per step (0.0%) |
+| Data loader alone (8 workers) | 155 images/s, about 3.3x what one H100 consumes |
+| GPU utilization (`nvidia-smi`) | median 99% (coarse: a kernel was running, not how efficiently) |
+| Allocator retries at batch 16 | 0 |
+| Gradient clipping | skipped on every step (no `grad_clip` in the config) |
 
-When those results exist, section 1 gets a "where the time goes" row, and Phase 0 is done.
+Where a step goes (a synchronize between phases, so the sum is 0.3464 s against the natural 0.3376 s):
+
+| Phase | ms | % |
+|---|---:|---:|
+| backward | 225.8 | 65.2% |
+| forward + loss | 103.8 | 30.0% |
+| EMA update | 10.3 | 3.0% |
+| optimizer step | 5.2 | 1.5% |
+| host-to-device copy | 1.0 | 0.3% |
+| data wait, noise and timestep sampling, logging | ~0.2 | ~0.0% |
+
+GPU time by operation (5 profiled steps): convolution backward 40.5%, forward convolutions ~14%
+(the kernels are TF32 `sm90` kernels, so convolutions already use the tensor cores), elementwise
+`mul` 8.7% and `add_` 7.9%, **`nchwToNhwc` layout conversions 8.8%**, GroupNorm backward 7.0%.
+
+What this means:
+1. **A step is 95% forward and backward compute**; data, optimizer, EMA and logging are about 5%
+   together. One H100 is saturated, so a single-GPU speedup must reduce GPU work (bf16,
+   `channels_last`, `torch.compile`), and more GPUs divide it.
+2. **`channels_last` has a measured target:** the 8.8% spent converting layouts for every convolution.
+   That is a ceiling, not a promise.
+3. **The elementwise operations (about 16%) are not the EMA** (the EMA is 3% of the step). They are
+   mostly the model's own operations, a target for `torch.compile` fusion.
+4. **Multi-GPU should scale well on compute:** the gradient all-reduce is 455 MB per step. At an
+   assumed PCIe bandwidth of about 50 GB/s that is roughly 10 ms against 226 ms of backward, and DDP
+   overlaps it with the backward pass. The 1.88x bound for 2 H100 at a global batch of 16 (section 2)
+   stands; the link speed is an assumption until `scaling_bench.sh` prints the topology.
+5. **The data loader is not a limit** for one GPU, and can feed about 3 GPUs' worth of images per
+   second from 8 workers. Under DDP each process has its own loader (8 workers each).
+
+**Memory: an unresolved discrepancy.** PyTorch reported a peak of 58.3 GiB allocated (60.4 GiB reserved)
+at batch 16, while `nvidia-smi` read about 51.5 GiB (52,755 MiB) in this job and in the batch-size test.
+Batch 33 also runs on a card with 93 GiB, which linear growth from 58.3 GiB at batch 16 would not allow.
+A hypothesis (**unverified**): with `cudnn.benchmark = True`, cuDNN tries algorithms with large temporary
+workspaces when memory is plentiful, which inflates the peak during the first steps. The profiler now
+reports the first-steps peak and the steady-state peak separately. Until that is rerun, quote 58.3 GiB as
+"peak during the first steps", not as the memory a step needs.
+
+## 5. Still open in Phase 0
+
+- Rerun the profile with the steady-state memory split, and at batch 33 (`BATCH=33 sbatch phase0_profile.sh`),
+  to test the allocator explanation for the slow batch 33 (the retry count at the edge).
+- Compare the second job's numbers (1445700, easley054) with the first (easley053) for node-to-node variation.
+- Nothing else: the parameter count, step-time split, loader speed, utilization and clipping are done.

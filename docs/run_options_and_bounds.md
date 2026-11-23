@@ -322,7 +322,7 @@ A crash costs at most the steps since the last checkpoint (up to 25,000, about
 | Scratch purge policy; whether the 100 GiB group quota can be raised | CARC documentation or staff |
 | GPU-hour allocation outside SLURM | staff |
 | Multi-node GPU jobs allowed | staff; decides how far Phase 4 can go |
-| `max_memory_allocated`, parameter count, step-time split | Phase 0 (`phase0_profile.sh`, not yet run) |
+| Steady-state memory (the first-steps peak of 58.3 GiB is inflated, probably by cuDNN benchmarking); the batch-33 allocator test | Phase 0 rerun: `phase0_profile.sh` (`BATCH=33`) |
 | Why `--export=ALL,VAR=...` makes H100 jobs fail env retrieval (a workaround exists; the cause on the node side is not known) | staff |
 | Hopper access | cluster notes section 6 |
 

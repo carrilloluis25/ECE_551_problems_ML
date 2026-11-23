@@ -138,7 +138,12 @@ def main():
     it = iter(loader)
     step_t, wait_t = [], []
     prev = None
+    peak_first = None
     for i in range(args.steps + args.warmup):
+        if i == args.warmup:      # separate the first steps (cuDNN benchmark tries large workspaces) from steady state
+            torch.cuda.synchronize()
+            peak_first = torch.cuda.max_memory_allocated() / 2**20
+            torch.cuda.reset_peak_memory_stats()
         tw = time.perf_counter()
         x = next(it)
         wait = time.perf_counter() - tw
@@ -165,8 +170,11 @@ def main():
     nat = med(step_t)
     print(f"[natural] median {nat:.4f} s/step = {args.batch / nat:.1f} images/s; "
           f"waiting for data: median {1000 * med(wait_t):.1f} ms/step ({100 * med(wait_t) / nat:.1f}% of the step)")
-    print(f"[memory] peak allocated {peak_alloc:,.0f} MiB ({peak_alloc / 1024:.1f} GiB); "
-          f"peak reserved by the caching allocator {peak_res:,.0f} MiB")
+    print(f"[memory] peak allocated during the first {args.warmup} steps {peak_first:,.0f} MiB ({peak_first / 1024:.1f} GiB); "
+          f"steady state after warm-up {peak_alloc:,.0f} MiB ({peak_alloc / 1024:.1f} GiB); "
+          f"peak reserved by the caching allocator since then {peak_res:,.0f} MiB")
+    print(f"[memory] allocated at the end of a step (weights + Adam + EMA + one batch): "
+          f"{torch.cuda.memory_allocated() / 2**20:,.0f} MiB")
     ms = torch.cuda.memory_stats()
     print(f"[memory] allocator retries (cudaMalloc failed, cache flushed, tried again): {ms.get('num_alloc_retries', 0)}; "
           f"cudaMalloc calls: {ms.get('segment.all.allocated', 'n/a')}  (many retries mean the card is too full)")
