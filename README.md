@@ -36,7 +36,6 @@ experiments can be replicated by others on the same cluster.
 | Cluster | Easley (UNM Alliance HPC) |
 | GPUs used so far | NVIDIA L40S (46 GB) and H100 NVL (about 94 GB) |
 | H100 usage | Batch-size test, learning-rate test, loss probe; the baseline run is in progress |
-| Hopper (A100) | No login found yet; the account lists Hopper QOS names, so access is **unverified** |
 | Python / PyTorch | 3.10.6 / 2.2.2 (cu121), conda env `fastddpm` |
 | Scheduler | SLURM. GPU partitions: `h100` (4 nodes x 2 H100) and `l40s` (3 nodes x 4 L40S); `interactive` (4 h, 1 node per user), `debug`, `scavenger`. `general` is CPU-only |
 | Scratch | `~/carc-scratch` (data and checkpoints live here, not in the repo) |
@@ -141,7 +140,6 @@ sbatch slurm/ldfdct_smoke_test.sh
 - Learning rate: the paper says 2e-4, the repo configs say 2e-5. Which one: **empty**
 - Extension after the HPC roadmap: **empty**
 - GPU-hour allocation and multi-node limits on Easley: **empty**
-- Hopper access: **empty**
 - Advisor / course deliverable format: **empty**
 
 ## Acknowledgements

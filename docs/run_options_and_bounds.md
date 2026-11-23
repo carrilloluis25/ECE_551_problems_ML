@@ -61,7 +61,6 @@ How the job shapes differ (single job, array, dependency chain, multi-GPU): see
 | **Per-user GPU caps** | **`h100`: 2 GPUs. `l40s`: 3 GPUs. `interactive`: 1 GPU, 1 node. `debug`: 2 GPUs, 2 nodes. `scavenger`: none listed.** So one job can use at most 2 H100 or 3 L40S, and multi-GPU tests cannot run on `interactive` | confirmed 2026-11-21 (`MaxTRESPU`); QOS-to-partition link assumed by name | `sacctmgr show qos format=Name%22,MaxWall,MaxTRESPU%70,MaxJobsPU,GrpTRES%40 \| grep -iE "name\|easley"` |
 | GPU-hour allocation | No `GrpTRESMins`, `MaxTRESMins`, `MaxWall` or `MaxJobs` on the account's associations. A budget could still exist outside SLURM (a CARC portal) | partly checked | `sacctmgr show assoc user=$USER` |
 | Multi-node GPU jobs | allowed or not: **unknown** | unverified | ask the staff |
-| Hopper (A100) | Associations name `hopper-*`, `wheeler`, `xena`; login and job access **unverified** | unverified | see cluster notes section 6 |
 | Held jobs | Jobs on the H100 nodes submitted with `--export=ALL,VAR=...` were held ("user env retrieval failed requeued held"). The same job without `--export` ran on `easley051`; variables set in the shell (`VAR=x sbatch ...`) also worked. Tested once per case, 2026-11-08 | confirmed (one A/B test) | `scontrol show job`, tutorial troubleshooting log |
 | H100 node states, 2026-11-08 | `easley051`, `easley054` idle and usable; `easley053` full with others' 8 h jobs; `easley052` down | confirmed | `sinfo -p h100 -N` |
 
@@ -323,7 +322,6 @@ A crash costs at most the steps since the last checkpoint (up to 25,000, about
 | GPU-hour allocation outside SLURM | staff |
 | Multi-node GPU jobs allowed | staff; decides how far Phase 4 can go |
 | Why `--export=ALL,VAR=...` makes H100 jobs fail env retrieval (a workaround exists; the cause on the node side is not known) | staff |
-| Hopper access | cluster notes section 6 |
 
 ---
 

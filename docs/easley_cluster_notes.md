@@ -16,7 +16,6 @@ From the cluster's published resource table (screenshot supplied by the user):
 | Cluster | Nodes | CPU cores | GPUs | Interconnect | Notes |
 |---|---|---|---|---|---|
 | Easley | 65 | 4,160 | 36x L40S + 8x H100 | NVIDIA NDR 800 Gbps InfiniBand | Newest; 23.3 TB RAM total |
-| Hopper | 61 | 2,176 | 37x A100 | NVIDIA HDR 400 Gbps InfiniBand | See section 6 |
 
 Observed on Easley (`scontrol show node <node> | grep -i gres`, `nvidia-smi`):
 - `easley058`: 4x L40S, 64 CPUs, ~257 GB RAM (**confirmed**). Not every node has
@@ -227,24 +226,7 @@ Findings:
   margin in a 48-hour limit, so it runs as four chained 125,000-step jobs. The 10,000-step
   learning-rate runs measured 29 min per 5,000 steps (0.348 s/step), matching 0.342.
 
-## 6. Hopper
-
-The account's SLURM associations (`sacctmgr show assoc user=$USER`) list QOS
-names `hopper-condo`, `hopper-debug` and `hopper-genera+` (truncated, probably
-`hopper-general`), plus other CARC clusters (`wheeler`, `xena`). This suggests the
-shared accounting database associates the account with Hopper (**unverified**).
-It does not prove login or job-submission access. Earlier attempts to find a
-Hopper login node found none.
-
-To test:
-```bash
-sacctmgr show cluster format=cluster%12,controlhost,controlport
-sinfo -M all 2>&1 | head
-```
-Or ask the staff whether the account has Hopper access and how to log in.
-If it does, Hopper's A100s (80 GB) would fit the paper's batch size of 16.
-
-## 7. Commands used to learn the above
+## 6. Commands used to learn the above
 
 | Question | Command |
 |---|---|
@@ -257,9 +239,8 @@ If it does, Hopper's A100s (80 GB) would fit the paper's batch size of 16.
 | Storage mounts | `df -h \| grep -i carc`, `readlink -f ~/carc-scratch` |
 | GPU driver / CUDA | `nvidia-smi` inside a GPU allocation |
 
-## 8. Questions for the cluster staff
+## 7. Questions for the cluster staff
 
-- Do I have access to Hopper, and how do I log in?
 - Any GPU-hour allocation for my account? (The per-user caps are known: 2 H100, 3 L40S, 1 on `interactive`. Can they be raised for a scaling study?)
 - What are the per-user limits on the `h100` and `l40s` partitions, and can I run multi-node jobs there?
 - Scratch purge policy? Can the 100 GiB group quota (hit on 2026-11-10) be raised for a 500,000-step run?

@@ -10,21 +10,17 @@ not written once and left stale.
 
 | Cluster | Nodes | GPUs | Interconnect | Use for |
 |---|---|---|---|---|
-| Easley | 65 | 36× L40S + 8× H100 | NDR 800 Gbps InfiniBand | **All work** — only cluster we have direct login access to |
-| Hopper | 61 | 37× NVIDIA A100 (80GB) | HDR 400 Gbps InfiniBand | Not reachable from this account (no separate Hopper login found) |
+| Easley | 65 | 36× L40S + 8× H100 | NDR 800 Gbps InfiniBand | **All work** |
 
-**Revised plan (pivoted from the original Hopper-first plan):** Fast-DDPM
-pins PyTorch 1.12.1, which predates official H100 (`sm_90`)/L40S (`sm_89`)
-support — the original plan was to baseline on Hopper's A100s (a hardware
-match to the paper) and defer Easley until later. Since we only have Easley
-access, we run everything here from the start using a **modern PyTorch build
-(2.2.2)** instead of the paper's pinned 1.12.1. Consequence: our numbers
-won't be a bit-for-bit reproduction of the paper's Table I (different
-torch version + different GPU architecture), but should land close — worth
-stating explicitly in any writeup, not a blocker.
+**PyTorch version:** Fast-DDPM pins PyTorch 1.12.1, which predates official
+H100 (`sm_90`)/L40S (`sm_89`) support. We run everything on Easley using a
+**modern PyTorch build (2.2.2)** instead of the paper's pinned 1.12.1.
+Consequence: our numbers won't be a bit-for-bit reproduction of the paper's
+Table I (different torch version + different GPU architecture). They did land
+close (37.457 dB / 0.9155 vs. the paper's 37.46 / 0.9155) — worth stating
+explicitly in any writeup.
 
-This also narrows the Semester 2 "hardware comparison" idea (§9) from a
-3-way A100/H100/L40S comparison down to L40S vs. H100, both on Easley.
+The Semester 2 "hardware comparison" (§9) is L40S vs. H100, both on Easley.
 
 **GPU resource names for `srun`/`sbatch --gres`:** `gpu:l40s` and (assumed,
 verify before use) `gpu:h100`. Confirmed via:
@@ -404,15 +400,13 @@ python fast_ddpm_main.py --config $CONFIG --exp runs/sweep_${SLURM_ARRAY_TASK_ID
 ```
 
 Give every array task a unique `--exp`/`--doc` so outputs never collide.
-Hopper's 37 A100s give real parallel capacity for this — but GPU count, not
-node count, is the actual concurrency ceiling, and it's shared with other
-cluster users.
+Easley's GPUs give real parallel capacity for this — but GPU count, not
+node count, is the actual concurrency ceiling (per user: 2 H100 or 3 L40S at
+a time), and the GPUs are shared with other cluster users.
 
 ## 9. Hardware comparison — Semester 2
 
-Originally planned as a 3-way A100/H100/L40S comparison across Hopper and
-Easley; narrowed to **L40S vs. H100** since Hopper isn't reachable from this
-account (§1). The environment built in §4 already supports both (torch
+An **L40S vs. H100** comparison, both on Easley. The environment built in §4 already supports both (torch
 2.2.2 covers `sm_89` and `sm_90`), so this is just a matter of re-running the
 same config with `--gres=gpu:h100:1` instead of `gpu:l40s:1` once the L40S
 baseline works — verify the actual H100 gres name first (§1) since it was
