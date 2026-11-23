@@ -80,7 +80,7 @@ H100-hours** at 0.345 to 0.359 s/step (**measured**, from `sacct`). Checkpoints 
 | A job's exit code shows success | the fork's `main` returns 0 after a crash | the quota failure |
 | 4 L40S in one job is possible | the cap is 3 (1 on `interactive`) | `sacctmgr` |
 
-## 4. Profile results (2026-11-22, H100, batch 16, job 1445699)
+## 4. Profile results (H100, batch 16, job 1445699)
 
 `slurm/phase0_profile.sh`, one H100 (**measured**; the 5-step `torch.profiler` pass adds its own overhead).
 
@@ -129,7 +129,7 @@ What this means:
 0.3399 s/step (a 0.7% spread), with the same phase split (backward 65.2 to 65.3%, forward 30.0%) and 99%
 GPU utilization (**measured**).
 
-**Memory (batch 16, measured with the updated profiler, 2026-11-22):**
+**Memory (batch 16, measured with the updated profiler):**
 
 | | MiB | GiB |
 |---|---:|---:|
