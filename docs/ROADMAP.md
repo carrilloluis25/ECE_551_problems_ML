@@ -232,11 +232,6 @@ Themes the project should cover to round it out. Status: done / partial / empty
 - [ ] **Image datasets on students' own computers** — empty.
 - [ ] **Implement an interface** — empty (form of the interface not defined).
 
-### Unclear items (need clarification before they can be planned)
-- [ ] "xtern concept" — empty
-- [ ] "get equations from MIT book" — empty (which book/chapter?)
-- [ ] "show depth" — empty (depth of the math, depth of the experiments, or 3D depth?)
-
 ## Open decisions to revisit
 
 - [ ] Which of the three Fast-DDPM tasks to reproduce first (super-resolution
