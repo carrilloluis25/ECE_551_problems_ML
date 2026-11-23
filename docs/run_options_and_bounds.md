@@ -24,9 +24,9 @@ Recorded 2026-11-03. Statuses: **confirmed** (seen in a log or command output),
 | Train longer than the 2-day limit allows | **Chain of resumable jobs** (`--dependency=afterok`) | `h100` | `submit_baseline.sh` |
 | Probe what loss a known-good model has | Single job | `h100`, 1 GPU, 30 min | `authors_loss_probe.sh` |
 | Sweep many configs (step count, scheduler, ...) | Job array | `l40s` or `h100`; concurrency = free GPUs | tutorial section 8 |
-| Train on several GPUs at once | One job, `--gres=gpu:<type>:N`, `torchrun` | One node: 2 H100 or 4 L40S | Phase 3: **not built yet** (needs DDP) |
+| Train on several GPUs at once | One job, `--gres=gpu:<type>:N`, `torchrun` | One node: 2 H100 or 3 L40S (the per-user caps; an L40S node has 4 cards) | Phase 3: **not built yet** (needs DDP) |
 | Train across nodes | `--nodes=2` + `srun torchrun` | multi-node permission **unverified** | Phase 4: **not built yet** |
-| View images | Colab, or the notebook on Easley JupyterHub | | `notebooks/fast_ddpm_viewer.ipynb` |
+| View images | Colab, or the notebook on Easley JupyterHub (needs a hub profile **with a GPU**) | 1 GPU | `notebooks/fast_ddpm_viewer.ipynb`; setup in [jupyter_notebooks.md](jupyter_notebooks.md) |
 
 Never submitted a job? Start with [slurm_first_script.md](slurm_first_script.md).
 
